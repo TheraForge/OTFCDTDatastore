@@ -25,10 +25,11 @@ Pod::Spec.new do |s|
   s.homepage     = "http://github.com/cloudant/CDTDatastore"
   s.license      = {:type => 'Apache, Version 2.0', :text => license}
   s.author       = { "Cloudant, Inc." => "support@cloudant.com" }
-  s.source       = { :git => "https://github.com/HippocratesTech/OTFCDTDatastore", :tag => s.version }
+  s.source       = { :git => "https://github.com/TheraForge/OTFCDTDatastore", :tag => s.version }
 
   s.ios.deployment_target = '13.0'
   s.osx.deployment_target = '10.9'
+  s.watchos.deployment_target = '8.0'
   s.requires_arc = true
 
   s.default_subspec = 'standard'

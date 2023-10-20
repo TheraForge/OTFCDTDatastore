@@ -4,6 +4,13 @@ OTFCDTDatastore provides Cloudant Sync to store, index and query local JSON data
 
 Please refer to the top-level parent framework: [OTFToolBox](https://github.com/TheraForge/OTFToolBox)
 
+## Change Log
+<details open>
+  <summary>Release 1.0.3-beta</summary>
+  <ul>
+    <li>Added Watch OS support</li>
+  </ul>
+</details>
 
 ## Table of contents
 * [Overview](#overview)
