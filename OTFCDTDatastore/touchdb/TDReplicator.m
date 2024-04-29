@@ -35,7 +35,7 @@
 #import "TD_Database+Replication.h"
 #import "Test.h"
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
 #import <UIKit/UIApplication.h>
 #endif
 
@@ -510,7 +510,7 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
     }
     return YES;
 }
-
+#if TARGET_OS_IOS
 - (void)reachabilityChanged:(TDReachability*)host
 {
     os_log_info(CDTOSLog, "%{public}@: Reachability state = %{public}@ (%{public}02X)", self, host, host.reachabilityFlags);
@@ -520,7 +520,7 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
     else if (host.reachabilityKnown)
         [self goOffline];
 }
-
+#endif
 - (void)updateActive
 {
     BOOL active = _batcher.count > 0 || _asyncTaskCount > 0;

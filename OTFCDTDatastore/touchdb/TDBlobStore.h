@@ -17,7 +17,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import <fmdb/FMDB.h>
+#import "FMDB.h"
 
 #import <CommonCrypto/CommonDigest.h>
 

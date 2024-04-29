@@ -12,8 +12,8 @@
 typedef uint32_t SCNetworkReachabilityFlags;
 typedef void* SCNetworkReachabilityRef;
 typedef void* CFRunLoopRef;
-#else
-#import <SystemConfiguration/SCNetworkReachability.h>
+#elif TARGET_OS_IOS
+    #import <SystemConfiguration/SCNetworkReachability.h>
 #endif
 
 typedef void (^TDReachabilityOnChangeBlock)(void);
@@ -27,9 +27,11 @@ typedef void (^TDReachabilityOnChangeBlock)(void);
    Generally it just means that you have an Internet connection. */
 @interface TDReachability : NSObject {
     NSString* _hostName;
-    SCNetworkReachabilityRef _ref;
     CFRunLoopRef _runLoop;
+#if TARGET_OS_IOS
+    SCNetworkReachabilityRef _ref;
     SCNetworkReachabilityFlags _reachabilityFlags;
+#endif
     BOOL _reachabilityKnown;
     TDReachabilityOnChangeBlock _onChange;
 }
@@ -53,8 +55,10 @@ typedef void (^TDReachabilityOnChangeBlock)(void);
  * error. */
 @property (readonly, nonatomic) BOOL reachabilityKnown;
 
+#if TARGET_OS_IOS
 /** The exact reachability flags; see Apple docs for the meanings of the bits. */
 @property (readonly, nonatomic) SCNetworkReachabilityFlags reachabilityFlags;
+#endif
 
 /** Is this host reachable via a currently active network interface? */
 @property (readonly) BOOL reachable;

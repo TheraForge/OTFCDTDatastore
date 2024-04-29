@@ -12,7 +12,7 @@
 #import <OTFCDTDatastore/CDTQIndexManager.h>
 #import <OTFCDTDatastore/CDTDatastore.h>
 
-#import <FMDB/FMDB.h>
+#import "FMDB/FMDB.h"
 
 @interface CDTQMatcherQueryExecutor ()
 

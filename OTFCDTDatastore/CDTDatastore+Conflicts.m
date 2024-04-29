@@ -13,7 +13,7 @@
 //  either express or implied. See the License for the specific language governing permissions
 //  and limitations under the License.
 
-#import <FMDB/FMDB.h>
+#import "FMDB.h"
 #import <sqlite3.h>
 #import "CDTAttachment.h"
 #import "CDTConflictResolver.h"

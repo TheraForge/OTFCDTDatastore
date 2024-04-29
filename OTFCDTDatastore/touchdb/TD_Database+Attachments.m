@@ -38,11 +38,11 @@
 #import "TDInternal.h"
 
 #import "CollectionUtils.h"
-#import <fmdb/FMDatabase.h>
-#import <fmdb/FMDatabaseQueue.h>
-#import <fmdb/FMDatabaseAdditions.h>
-#import <fmdb/FMResultSet.h>
-#import <GoogleToolboxForMac/GTMNSData+zlib.h>
+#import "FMDatabase.h"
+#import "FMDatabaseQueue.h"
+#import "FMDatabaseAdditions.h"
+#import "FMResultSet.h"
+#import "GTMNSData+zlib.h"
 #import "Test.h"
 
 #import "CDTLogging.h"

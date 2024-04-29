@@ -17,16 +17,23 @@
 
 #import "TDReachability.h"
 #import "CollectionUtils.h"
-#import <SystemConfiguration/SystemConfiguration.h>
 #include <arpa/inet.h>
+
+#if TARGET_OS_IOS
+#import <SystemConfiguration/SystemConfiguration.h>
 
 static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags,
                            void *info);
+#endif
+
 
 @interface TDReachability ()
 @property (readwrite, nonatomic) BOOL reachabilityKnown;
+#if TARGET_OS_IOS
 @property (readwrite, nonatomic) SCNetworkReachabilityFlags reachabilityFlags;
 - (void)flagsChanged:(SCNetworkReachabilityFlags)flags;
+#endif
+
 @end
 
 @implementation TDReachability
@@ -37,11 +44,13 @@ static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilit
     if (self) {
         if (!hostName.length) hostName = @"localhost";
         _hostName = [hostName copy];
+#if TARGET_OS_IOS
         _ref = SCNetworkReachabilityCreateWithName(NULL, [_hostName UTF8String]);
         SCNetworkReachabilityContext context = {0, (__bridge void *)(self)};
         if (!_ref || !SCNetworkReachabilitySetCallback(_ref, ClientCallback, &context)) {
             return nil;
         }
+#endif
     }
     return self;
 }
@@ -50,19 +59,25 @@ static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilit
 {
     CFRunLoopRef runLoop = CFRunLoopGetCurrent();
     if (_runLoop) return (_runLoop == runLoop);
+#if TARGET_OS_IOS
     if (!SCNetworkReachabilityScheduleWithRunLoop(_ref, runLoop, kCFRunLoopCommonModes)) return NO;
+#endif
     _runLoop = (CFRunLoopRef)CFRetain(runLoop);
 
     // See whether status is already known:
+#if TARGET_OS_IOS
     if (SCNetworkReachabilityGetFlags(_ref, &_reachabilityFlags)) _reachabilityKnown = YES;
-
+#endif
+    
     return YES;
 }
 
 - (void)stop
 {
     if (_runLoop) {
+#if TARGET_OS_IOS
         SCNetworkReachabilityUnscheduleFromRunLoop(_ref, _runLoop, kCFRunLoopCommonModes);
+#endif
         CFRelease(_runLoop);
         _runLoop = NULL;
     }
@@ -70,14 +85,18 @@ static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilit
 
 - (void)dealloc
 {
+#if TARGET_OS_IOS
     if (_ref) {
         [self stop];
         CFRelease(_ref);
     }
+#endif
 }
 
-@synthesize hostName = _hostName, onChange = _onChange, reachabilityKnown = _reachabilityKnown,
-            reachabilityFlags = _reachabilityFlags;
+@synthesize hostName = _hostName, onChange = _onChange, reachabilityKnown = _reachabilityKnown;
+#if TARGET_OS_IOS
+@synthesize reachabilityFlags = _reachabilityFlags;
+#endif
 
 - (NSString *)status
 {
@@ -85,7 +104,7 @@ static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilit
         return @"unknown";
     else if (!self.reachable)
         return @"unreachable";
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
     else if (!self.reachableByWiFi)
         return @"reachable (3G)";
 #endif
@@ -93,24 +112,33 @@ static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilit
         return @"reachable";
 }
 
-- (NSString *)description { return $sprintf(@"<%@>:%@", _hostName, self.status); }
+- (NSString *)description {
+#if TARGET_OS_WATCH
+    return [NSString stringWithFormat:@"<%@>:%@", _hostName, self.status];
+#else
+    return $sprintf(@"<%@>:%@", _hostName, self.status);
+#endif
+}
 
 - (BOOL)reachable
 {
     // We want 'reachable' to be on, but not any of the flags that indicate that a network interface
     // must first be brought online.
-    return _reachabilityKnown &&
-           (_reachabilityFlags &
+    return _reachabilityKnown
+#if TARGET_OS_IOS
+            && (_reachabilityFlags &
             (kSCNetworkReachabilityFlagsReachable | kSCNetworkReachabilityFlagsConnectionRequired |
              kSCNetworkReachabilityFlagsConnectionAutomatic |
              kSCNetworkReachabilityFlagsInterventionRequired)) ==
-               kSCNetworkReachabilityFlagsReachable;
+               kSCNetworkReachabilityFlagsReachable
+#endif
+    ;
 }
 
 - (BOOL)reachableByWiFi
 {
     return self.reachable
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
            && !(_reachabilityFlags & kSCNetworkReachabilityFlagsIsWWAN)
 #endif
         ;
@@ -126,19 +154,35 @@ static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilit
     return [NSSet setWithObjects:@"reachabilityKnown", @"reachabilityFlags", nil];
 }
 
-- (void)flagsChanged:(SCNetworkReachabilityFlags)flags
+- (void)flagsChanged
+#if TARGET_OS_IOS
+:(SCNetworkReachabilityFlags)flags
+#endif
 {
-    if (!_reachabilityKnown || flags != _reachabilityFlags) {
+    if (!_reachabilityKnown
+#if TARGET_OS_IOS
+        || flags != _reachabilityFlags
+#endif
+        ) {
+#if TARGET_OS_IOS
         self.reachabilityFlags = flags;
+#endif
         self.reachabilityKnown = YES;
         if (_onChange) _onChange();
     }
 }
 
-static void ClientCallback(SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags,
+static void ClientCallback(
+#if TARGET_OS_IOS
+                           SCNetworkReachabilityRef target, SCNetworkReachabilityFlags flags,
+#endif
                            void *info)
 {
-    [(__bridge TDReachability *)info flagsChanged:flags];
+    [(__bridge TDReachability *)info flagsChanged
+#if TARGET_OS_IOS
+     :flags
+#endif
+    ];
 }
 
 @end

@@ -30,9 +30,9 @@
 #import "TDMisc.h"
 #import "Test.h"
 
-#import <fmdb/FMDatabase.h>
-#import <fmdb/FMDatabaseAdditions.h>
-#import <fmdb/FMDatabaseQueue.h>
+#import "FMDatabase.h"
+#import "FMDatabaseAdditions.h"
+#import "FMDatabaseQueue.h"
 
 #if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
@@ -48,7 +48,7 @@ NSString *const CDTDatastoreChangeNotification = @"CDTDatastoreChangeNotificatio
 @interface CDTDatastore ()
 
 @property (nonatomic, strong, readonly) id<CDTEncryptionKeyProvider> keyProvider;
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
 @property UIBackgroundTaskIdentifier *backgroundTaskIdentifier;
 #endif
 
@@ -171,16 +171,21 @@ int runningProcess;
 }
 
 -(void)endBackgroundTaskIfAny {
+#if TARGET_OS_IOS
     if (self.backgroundTaskIdentifier != nil) {
         [[UIApplication sharedApplication] endBackgroundTask: *(self.backgroundTaskIdentifier)];
     }
+#endif
 }
 
 -(void)beginBackgroundTask {
+#if TARGET_OS_IOS
+
     *(self.backgroundTaskIdentifier) =
     [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
         [self endBackgroundTaskIfAny];
     }];
+#endif
 }
 
 -(NSError*)setRunToCompletionModeWithin10Sec {

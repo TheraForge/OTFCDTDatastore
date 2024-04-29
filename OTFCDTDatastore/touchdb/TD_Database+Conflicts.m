@@ -14,9 +14,9 @@
 //  and limitations under the License.
 
 #import "TD_Database+Conflicts.h"
-#import <fmdb/FMDatabase.h>
-#import <fmdb/FMResultSet.h>
-#import <fmdb/FMDatabaseQueue.h>
+#import "FMDatabase.h"
+#import "FMResultSet.h"
+#import "FMDatabaseQueue.h"
 
 @implementation TD_Database (Conflicts)
 

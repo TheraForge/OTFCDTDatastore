@@ -32,11 +32,11 @@
 #import "TDJSON.h"
 #import "Test.h"
 
-#import <fmdb/FMDatabase.h>
-#import <fmdb/FMDatabaseAdditions.h>
+#import "FMDatabase.h"
+#import "FMDatabaseAdditions.h"
 #import "FMDatabase+LongLong.h"
 #import "FMDatabase+EncryptionKey.h"
-#import <fmdb/FMDatabaseQueue.h>
+#import "FMDatabaseQueue.h"
 #import "CDTEncryptionKeyProvider.h"
 #import "CDTLogging.h"
 

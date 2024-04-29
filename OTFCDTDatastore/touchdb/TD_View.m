@@ -22,10 +22,10 @@
 #import "TDMisc.h"
 #import "TDJSON.h"
 
-#import <fmdb/FMDatabase.h>
-#import <fmdb/FMDatabaseAdditions.h>
-#import <fmdb/FMDatabaseQueue.h>
-#import <fmdb/FMResultSet.h>
+#import "FMDatabase.h"
+#import "FMDatabaseAdditions.h"
+#import "FMDatabaseQueue.h"
+#import "FMResultSet.h"
 
 #import "FMDatabase+LongLong.h"
 

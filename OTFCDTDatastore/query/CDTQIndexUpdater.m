@@ -22,7 +22,7 @@
 
 #import "CloudantSync.h"
 
-#import <FMDB/FMDB.h>
+#import "FMDB.h"
 
 @interface CDTQIndexUpdater ()
 

@@ -55,7 +55,7 @@
     }
     return nil;
 }
-
+#if TARGET_OS_IOS
 - (NSString*)authorizeHTTPMessage:(CFHTTPMessageRef)message forRealm:(NSString*)realm
 {
     NSString* username = _credential.user;
@@ -67,7 +67,7 @@
     }
     return nil;
 }
-
+#endif
 - (NSString*)description { return $sprintf(@"%@", self.class); }
 
 #if 0
@@ -142,7 +142,7 @@
     if (!request) return nil;
     return [self authorizeMethod:request.HTTPMethod URL:request.URL body:request.HTTPBody];
 }
-
+#if TARGET_OS_IOS
 - (NSString*)authorizeHTTPMessage:(CFHTTPMessageRef)message forRealm:(NSString*)realm
 {
     if (!message) return nil;
@@ -151,5 +151,5 @@
     NSData* body = CFBridgingRelease(CFHTTPMessageCopyBody(message));
     return [self authorizeMethod:method URL:url body:body];
 }
-
+#endif
 @end

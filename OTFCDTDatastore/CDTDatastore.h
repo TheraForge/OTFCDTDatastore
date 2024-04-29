@@ -16,9 +16,8 @@
 #import <Foundation/Foundation.h>
 #import "CDTDatastoreManager.h"
 #import "CDTNSURLSessionConfigurationDelegate.h"
-#if TARGET_OS_IPHONE
 #import <OTFToolBoxCore/OTFToolBoxCore-Swift.h>
-#endif
+
 
 @class CDTDocumentRevision;
 @class FMDatabase;
@@ -267,7 +266,6 @@ typedef NS_ENUM(NSUInteger, OTFProtectionLevel) {
  */
 - (BOOL)compactWithError:(NSError *__nullable * __nullable)error;
 
-#if TARGET_OS_IPHONE
 /// This function will help to set FILE Protection manually by users.
 /// @param type Its FileProtection Type Enum provided by Apple, user can pass any Protection case whatever they need to set on there files.
 -(void)encryptFile: (NSFileProtectionType _Nonnull)type;
@@ -278,7 +276,6 @@ typedef NS_ENUM(NSUInteger, OTFProtectionLevel) {
 
 /// This funtion will return the current applied file protection policy on files.
 - (NSFileProtectionType _Nullable)appliedProtectionPolicyOnDb;
-#endif
 
 /**
  * Set the delegate for handling customisation of the NSURLSession

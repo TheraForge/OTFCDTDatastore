@@ -28,9 +28,9 @@
 #import "TDMisc.h"
 #import "Test.h"
 
-#import <fmdb/FMDatabase.h>
-#import <fmdb/FMDatabaseAdditions.h>
-#import <fmdb/FMDatabaseQueue.h>
+#import "FMDatabase.h"
+#import "FMDatabaseAdditions.h"
+#import "FMDatabaseQueue.h"
 
 #import "CDTLogging.h"
 

@@ -13,7 +13,7 @@
 // Modified for distribution by IBM Cloudant, (c) copyright IBM Cloudant 2015
 
 #import <Foundation/Foundation.h>
-#import <fmdb/FMDatabase.h>
+#import "FMDatabase.h"
 
 @interface FMDatabase (LongLong)
 
