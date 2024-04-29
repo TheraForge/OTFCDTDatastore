@@ -14,7 +14,7 @@
 //  and limitations under the License.
 //
 
-#import <FMDB/FMDatabase.h>
+#import "FMDatabase.h"
 
 /** Value type returned by +isDatabaseUnencryptedAtPath: */
 typedef enum {

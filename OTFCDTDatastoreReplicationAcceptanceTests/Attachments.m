@@ -13,8 +13,8 @@
 #import <XCTest/XCTest.h>
 #import <OTFCDTDatastore/CloudantSync.h>
 #import <OTFCDTDatastore/CloudantSyncEncryption.h>
-#import <FMDB/FMDatabase.h>
-#import <FMDB/FMDatabaseQueue.h>
+#import "FMDatabase.h"
+#import "FMDatabaseQueue.h"
 
 #import <OTFCDTDatastore/TDReplicator.h>
 #import <OTFCDTDatastore/TDPusher.h>

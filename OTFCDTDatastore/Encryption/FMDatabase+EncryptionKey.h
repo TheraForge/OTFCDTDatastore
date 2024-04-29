@@ -14,7 +14,7 @@
 //  and limitations under the License.
 //
 
-#import <fmdb/FMDatabase.h>
+#import "FMDatabase.h"
 
 #import "CDTEncryptionKeyProvider.h"
 

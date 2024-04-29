@@ -24,7 +24,7 @@
 #import "CDTDocumentRevision.h"
 #import "CDTQQueryValidator.h"
 
-#import <FMDB/FMDB.h>
+#import "FMDB.h"
 
 const NSUInteger kSmallResultSetSizeThreshold = 500;
 

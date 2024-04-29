@@ -6,9 +6,19 @@ Please refer to the top-level parent framework: [OTFToolBox](https://github.com/
 
 ## Change Log
 <details open>
+  <summary>Release 1.0.4-beta</summary>
+  <ul>
+    <li>Added watchOS target</li>
+    <li>Removed GoogleToolboxForMac from OTFCDTDatastore</li>
+    <li>Added FMDB as project source</li>
+  </ul>
+  
+</details>
+
+<details>
   <summary>Release 1.0.3-beta</summary>
   <ul>
-    <li>Added Watch OS support</li>
+    <li>Added watchOS support</li>
   </ul>
 </details>
 

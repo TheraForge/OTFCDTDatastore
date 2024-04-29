@@ -5,20 +5,20 @@ use_frameworks!
 
 if ENV["encrypted"]
     MRDatabaseContentChecker = "MRDatabaseContentChecker/SQLCipher"
-    FMDB = "FMDB/SQLCipher"
 else
     MRDatabaseContentChecker = "MRDatabaseContentChecker"
-    FMDB = "FMDB"
 end
 
 abstract_target 'base' do
-    pod FMDB, '= 2.6'
     pod 'SQLCipher/fts', '~> 3.1.0' if ENV["encrypted"]
-    pod 'GoogleToolboxForMac/NSData+zlib', '~> 2.1.1'
 
     target :OTFCDTDatastore do
         platform :ios, '13.0'
-        pod 'OTFToolBoxCore', '~> 0.0.1'
+        pod 'OTFToolBoxCore', '~> 1.0.4-beta'
+    end
+    target :OTFCDTDatastoreWatch do
+        platform :watchos, '8.0'
+        pod 'OTFToolBoxCore', '~> 1.0.4-beta'
     end
     target :OTFCDTDatastoreOSX do
         platform :osx, '10.9'
@@ -31,7 +31,6 @@ abstract_target 'base' do
         pod 'OCMock'
         pod 'OHHTTPStubs', '~> 8.0.0'
         pod 'RSSwizzle'
-        pod MRDatabaseContentChecker, :git => 'https://github.com/rhyshort/MRDatabaseContentChecker.git'
 
         target :OTFCDTDatastoreTests do
             platform :ios, '13.0'

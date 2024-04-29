@@ -14,8 +14,9 @@
 /** Should generate and return an authorization string for the given request.
     The string, if non-nil, will be set as the value of the "Authorization:" HTTP header. */
 - (NSString*)authorizeURLRequest:(NSMutableURLRequest*)request forRealm:(NSString*)realm;
-
+#if TARGET_OS_IOS
 - (NSString*)authorizeHTTPMessage:(CFHTTPMessageRef)message forRealm:(NSString*)realm;
+#endif
 
 @optional
 

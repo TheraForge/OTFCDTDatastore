@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import <FMDB/FMDB.h>
+#import "FMDB/FMDB.h"
 
 #import "TD_Database+BlobFilenames.h"
 
