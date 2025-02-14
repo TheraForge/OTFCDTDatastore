@@ -14,11 +14,11 @@ abstract_target 'base' do
 
     target :OTFCDTDatastore do
         platform :ios, '13.0'
-        pod 'OTFToolBoxCore', '~> 1.0.4-beta'
+        pod 'OTFToolBoxCore', '~> 1.0.5-beta'
     end
     target :OTFCDTDatastoreWatch do
         platform :watchos, '8.0'
-        pod 'OTFToolBoxCore', '~> 1.0.4-beta'
+        pod 'OTFToolBoxCore', '~> 1.0.5-beta'
     end
     target :OTFCDTDatastoreOSX do
         platform :osx, '10.9'
