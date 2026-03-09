@@ -14,20 +14,17 @@ EOT
 
 Pod::Spec.new do |s|
   s.name         = "OTFCDTDatastore"
-  s.version      = "0.0.1"
-  s.summary      = "OTFCDTDatastore is a document datastore which syncs."
+  s.version      = "2.1.1-tf.2"
+  s.summary      = "OTFCDTDatastore is a document datastore which syncs between many devices."
   s.description  = <<-DESC
-                      OTFCDTDatastore is a JSON document datastore which speaks the
-                    Apache CouchDB(tm) replication protocol.
-
-                    * Replicates with Cloudant and CouchDB.
+                      OTFCDTDatastore provides Cloudant Sync to store, index and query local JSON data on a device and to synchronise data between many devices.
                    DESC
-  s.homepage     = "http://github.com/cloudant/CDTDatastore"
+  s.homepage     = "https://github.com/TheraForge/OTFCDTDatastore"
   s.license      = {:type => 'Apache, Version 2.0', :text => license}
-  s.author       = { "Cloudant, Inc." => "support@cloudant.com" }
-  s.source       = { :git => "https://github.com/TheraForge/OTFCDTDatastore", :tag => s.version }
+  s.author       = { 'Hippocrates Technologies' => 'hippocratestech-dev@googlegroups.com' }
+  s.source       = { :git => "https://github.com/TheraForge/OTFCDTDatastore.git", :tag => s.version.to_s }
 
-  s.ios.deployment_target = '13.0'
+  s.ios.deployment_target = '14.6'
   s.osx.deployment_target = '10.9'
   s.watchos.deployment_target = '8.0'
   s.requires_arc = true
@@ -48,13 +45,10 @@ Pod::Spec.new do |s|
 
         if subspec_label == 'standard'
           sp.library = 'sqlite3', 'z'
-          sp.dependency 'FMDB', '= 2.6'
         else
           sp.xcconfig = { 'OTHER_CFLAGS' => '$(inherited) -DENCRYPT_DATABASE' }
           sp.library = 'z'
-          sp.dependency 'FMDB/SQLCipher', '= 2.6'
-
-          # Some OTFCDTDatastore classes use SQLite functions, therefore we have
+          # Some CDTDatastore classes use SQLite functions, therefore we have
           # to include 'SQLCipher' although 'FMDB/SQLCipher' also depends on it
           # or they will not compile (linker will not find some symbols).
           # Also, we have to force cocoapods to configure SQLCipher with support
@@ -65,12 +59,9 @@ Pod::Spec.new do |s|
   end
 
   s.subspec 'common-dependencies' do |sp|
-    sp.frameworks = 'SystemConfiguration'
-
     sp.dependency 'OTFCDTDatastore/no-arc'
-    sp.dependency 'CocoaLumberjack', '~> 2.0'
-    sp.dependency 'GoogleToolboxForMac/NSData+zlib', '~> 2.1.1'
-    sp.ios.dependency 'OTFToolBoxCore', '0.0.1'
+    sp.ios.dependency 'OTFToolBoxCore', '2.0.0'
+    sp.watchos.dependency 'OTFToolBoxCore', '2.0.0'
   end
 
   s.subspec 'no-arc' do |sp|
@@ -80,6 +71,6 @@ Pod::Spec.new do |s|
 
     sp.source_files = 'OTFCDTDatastore/vendor/MYUtilities/*.{h,m}'
     sp.ios.exclude_files = 'OTFCDTDatastore/vendor/MYUtilities/MYURLHandler.{h,m}'
-
+    sp.watchos.exclude_files = 'OTFCDTDatastore/vendor/MYUtilities/MYURLHandler.{h,m}'
   end
 end
