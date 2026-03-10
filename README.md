@@ -6,7 +6,14 @@ Please refer to the top-level parent framework: [OTFToolBox](https://github.com/
 
 ## Change Log
 <details open>
-  <summary>Release 1.0.4-beta</summary>
+  <summary>Release 2.1.1-tf.2</summary>
+  <ul>
+    <li>Updated dependencies for TheraForge 2.0.0 release</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Release 2.1.1-beta.4</summary>
   <ul>
     <li>Added watchOS target</li>
     <li>Removed GoogleToolboxForMac from OTFCDTDatastore</li>
@@ -16,7 +23,7 @@ Please refer to the top-level parent framework: [OTFToolBox](https://github.com/
 </details>
 
 <details>
-  <summary>Release 1.0.3-beta</summary>
+  <summary>Release 2.1.1-beta.3</summary>
   <ul>
     <li>Added watchOS support</li>
   </ul>

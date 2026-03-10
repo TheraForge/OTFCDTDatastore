@@ -109,7 +109,7 @@ static NSString* joinQuotedEscaped(NSArray* strings);
                           break;
                       default:
                           [strongSelf setBulkGetSupported:false];
-                          os_log_debug(CDTOSLog, "%{public}@ Remote database returned unexpected status code %ld when trying to determine whether database supports _bulk_get. Defaulting to _bulk_get not supported.", self, error.code);
+                          os_log_debug(CDTOSLog, "%{public}@ Remote database returned unexpected status code %ld when trying to determine whether database supports _bulk_get. Defaulting to _bulk_get not supported.", self, (long)error.code);
                   }
                   done = YES;
               }];
