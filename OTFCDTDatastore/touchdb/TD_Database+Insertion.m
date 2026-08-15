@@ -87,28 +87,31 @@ NSString* const TD_DatabaseChangeNotification = @"TD_DatabaseChange";
     // Generate a digest for this revision based on the previous revision ID, document JSON,
     // and attachment digests. This doesn't need to be secure; we just need to ensure that this
     // code consistently generates the same ID given equivalent revisions.
-    CC_SHA256_CTX sha256ctx;
-    unsigned char digestBytes[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256_Init(&sha256ctx);
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    CC_MD5_CTX md5ctx;
+    unsigned char digestBytes[CC_MD5_DIGEST_LENGTH];
+    CC_MD5_Init(&md5ctx);
     
     NSData* prevIDUTF8 = [prevID dataUsingEncoding:NSUTF8StringEncoding];
     NSUInteger length = prevIDUTF8.length;
     if (length > 0xFF) return nil;
     uint8_t lengthByte = length & 0xFF;
-    CC_SHA256_Update(&sha256ctx, &lengthByte, 1);
-    if (length > 0) CC_SHA256_Update(&sha256ctx, prevIDUTF8.bytes, (CC_LONG)length);
+    CC_MD5_Update(&md5ctx, &lengthByte, 1);
+    if (length > 0) CC_MD5_Update(&md5ctx, prevIDUTF8.bytes, (CC_LONG)length);
 
     uint8_t deletedByte = rev.deleted != NO;
-    CC_SHA256_Update(&sha256ctx, &deletedByte, 1);
+    CC_MD5_Update(&md5ctx, &deletedByte, 1);
 
     for (NSString* attName in [attachments.allKeys sortedArrayUsingSelector:@selector(compare:)]) {
         TD_Attachment* attachment = attachments[attName];
-        CC_SHA256_Update(&sha256ctx, &attachment->blobKey, sizeof(attachment->blobKey));
+        CC_MD5_Update(&md5ctx, &attachment->blobKey, sizeof(attachment->blobKey));
     }
 
-    CC_SHA256_Update(&sha256ctx, json.bytes, (CC_LONG)json.length);
+    CC_MD5_Update(&md5ctx, json.bytes, (CC_LONG)json.length);
 
-    CC_SHA256_Final(digestBytes, &sha256ctx);
+    CC_MD5_Final(digestBytes, &md5ctx);
+#pragma clang diagnostic pop
     NSString* digest = TDHexFromBytes(digestBytes, sizeof(digestBytes));
     
     return [NSString stringWithFormat:@"%u-%@", generation + 1, digest];
@@ -464,9 +467,45 @@ NSString* const TD_DatabaseChangeNotification = @"TD_DatabaseChange";
             return nil;
         }
         os_log_info(CDTOSLog, "Duplicate rev insertion: %{public}@ / %{public}@", docID, newRevID);
+
+        FMResultSet* result = [db executeQuery:@"SELECT sequence FROM revs WHERE doc_id=? AND revid=? LIMIT 1",
+                               @(docNumericID), newRevID];
+        if (![result next]) {
+            [result close];
+            *outStatus = kTDStatusDBError;
+            return nil;
+        }
+
+        sequence = [result longLongIntForColumn:@"sequence"];
+        [result close];
+
+        if (parentSequence > 0) {
+            if (![db executeUpdate:@"UPDATE revs SET current=0 WHERE sequence=?", @(parentSequence)]) {
+                if (db.lastErrorCode == SQLITE_FULL) {
+                    *outStatus = kTDStatusInsufficientStorage;
+                } else {
+                    *outStatus = kTDStatusDBError;
+                }
+                return nil;
+            }
+        }
+
+        if (![db executeUpdate:@"UPDATE revs SET current=1 WHERE sequence=?", @(sequence)]) {
+            if (db.lastErrorCode == SQLITE_FULL) {
+                *outStatus = kTDStatusInsufficientStorage;
+            } else {
+                *outStatus = kTDStatusDBError;
+            }
+            return nil;
+        }
+
         *outStatus = kTDStatusOK;
-        rev.body = nil;
-        return nil;
+        *winningRev = [self winnerWithDocID:docNumericID
+                                  oldWinner:oldWinningRevID
+                                 oldDeleted:oldWinnerWasDeletion
+                                     newRev:rev
+                                   database:db];
+        return rev;
     }
 
     // Make replaced rev non-current:

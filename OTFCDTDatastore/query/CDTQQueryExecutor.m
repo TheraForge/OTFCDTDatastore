@@ -208,7 +208,6 @@ const NSUInteger kSmallResultSetSizeThreshold = 500;
 + (NSArray *)normaliseFields:(NSArray *)fields
 {
     if (fields.count == 0) {
-        os_log_debug(CDTOSLog, "Projection fields array is empty, disabling project for this query");
         return nil;
     }
 

@@ -14,7 +14,7 @@ EOT
 
 Pod::Spec.new do |s|
   s.name         = "OTFCDTDatastore"
-  s.version      = "2.1.1-tf.2"
+  s.version      = "2.1.1-tf.3"
   s.summary      = "OTFCDTDatastore is a document datastore which syncs between many devices."
   s.description  = <<-DESC
                       OTFCDTDatastore provides Cloudant Sync to store, index and query local JSON data on a device and to synchronise data between many devices.
@@ -24,9 +24,9 @@ Pod::Spec.new do |s|
   s.author       = { 'Hippocrates Technologies' => 'hippocratestech-dev@googlegroups.com' }
   s.source       = { :git => "https://github.com/TheraForge/OTFCDTDatastore.git", :tag => s.version.to_s }
 
-  s.ios.deployment_target = '14.6'
+  s.ios.deployment_target = '16.0'
   s.osx.deployment_target = '10.9'
-  s.watchos.deployment_target = '8.0'
+  s.watchos.deployment_target = '9.0'
   s.requires_arc = true
 
   s.default_subspec = 'standard'
@@ -60,8 +60,8 @@ Pod::Spec.new do |s|
 
   s.subspec 'common-dependencies' do |sp|
     sp.dependency 'OTFCDTDatastore/no-arc'
-    sp.ios.dependency 'OTFToolBoxCore', '2.0.0'
-    sp.watchos.dependency 'OTFToolBoxCore', '2.0.0'
+    sp.ios.dependency 'OTFToolBoxCore', '2.5.0'
+    sp.watchos.dependency 'OTFToolBoxCore', '2.5.0'
   end
 
   s.subspec 'no-arc' do |sp|

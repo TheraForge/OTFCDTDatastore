@@ -31,6 +31,19 @@
 
 @end
 
+static BOOL CDTQVerboseIndexUpdateLoggingEnabled(void)
+{
+    static BOOL enabled;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *value = [[[NSProcessInfo processInfo] environment] objectForKey:@"OTF_VERBOSE_INDEX_LOGS"];
+        enabled = [value isEqualToString:@"1"] ||
+                  [[value lowercaseString] isEqualToString:@"true"] ||
+                  [[value lowercaseString] isEqualToString:@"yes"];
+    });
+    return enabled;
+}
+
 @implementation CDTQIndexUpdater
 
 - (instancetype)initWithDatabase:(FMDatabaseQueue *)database datastore:(CDTDatastore *)datastore
@@ -132,7 +145,9 @@
 
     fetcher.documentChangedBlock = ^(CDTDocumentRevision *revision) {
 
-        os_log_debug(CDTOSLog, "documentChangedBlock: <%{public}@,%{public}@>", indexName, revision.docId);
+        if (CDTQVerboseIndexUpdateLoggingEnabled()) {
+            os_log_debug(CDTOSLog, "documentChangedBlock: <%{public}@,%{public}@>", indexName, revision.docId);
+        }
 
       [updateBatch addObject:revision];
 
@@ -150,7 +165,9 @@
 
     fetcher.documentWithIDWasDeletedBlock = ^(NSString *docId) {
 
-        os_log_debug(CDTOSLog, "documentWithIDWasDeletedBlock: <%{public}@,%{public}@>", indexName, docId);
+        if (CDTQVerboseIndexUpdateLoggingEnabled()) {
+            os_log_debug(CDTOSLog, "documentWithIDWasDeletedBlock: <%{public}@,%{public}@>", indexName, docId);
+        }
 
       [deleteBatch addObject:docId];
 
@@ -166,9 +183,6 @@
 
     fetcher.fetchRecordChangesCompletionBlock = ^(NSString *newSeqVal, NSString *prevSeqVal,
                                                   NSError *error) {
-
-        os_log_debug(CDTOSLog, "fetchRecordChangesCompletionBlock: <%{public}@,%{public}@>",
-                     indexName, newSeqVal);
 
       CDTQIndexUpdater *self = weakSelf;
       if (self) {

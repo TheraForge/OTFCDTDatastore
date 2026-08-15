@@ -15,7 +15,7 @@
 
 #import <XCTest/XCTest.h>
 #import <Foundation/Foundation.h>
-#import <MRDatabaseContentChecker/MRDatabaseContentChecker.h>
+#import "MRDatabaseContentChecker.h"
 
 #import "CloudantSyncTests.h"
 
@@ -71,6 +71,27 @@
 }
 
 #pragma mark - helper methods
+
+#if TARGET_OS_IPHONE
+- (void)testProtectionLevelReportsMissingFilesystemPath
+{
+    self.datastore.directory =
+        [NSTemporaryDirectory() stringByAppendingPathComponent:NSUUID.UUID.UUIDString];
+    NSError *error = nil;
+
+    XCTAssertNoThrow([self.datastore
+        setProtectionLevel:OTFProtectionLevelRunToCompletionWithIn10Seconds
+                     error:&error]);
+    XCTAssertNotNil(error);
+}
+
+- (void)testProtectionLevelEnumValuesRemainStable
+{
+    XCTAssertEqual(OTFProtectionLevelRunToCompletionWithIn10Seconds, 10);
+    XCTAssertEqual(OTFProtectionLevelRunToCompletionBeyond10Seconds, 20);
+    XCTAssertEqual(OTFProtectionLevelBackgroundMode, 30);
+}
+#endif
 
 
 -(NSArray*)generateDocuments:(int)count
