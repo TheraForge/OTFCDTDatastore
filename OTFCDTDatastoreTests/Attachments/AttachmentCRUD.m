@@ -16,7 +16,7 @@
 #import <XCTest/XCTest.h>
 
 #import <OTFCDTDatastore/CloudantSync.h>
-#import <MRDatabaseContentChecker/MRDatabaseContentChecker.h>
+#import "MRDatabaseContentChecker.h"
 
 #import "CloudantSyncTests.h"
 #import "DBQueryUtils.h"

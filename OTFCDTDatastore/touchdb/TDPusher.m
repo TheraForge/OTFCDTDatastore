@@ -31,6 +31,19 @@
 - (BOOL)uploadMultipartRevision:(TD_Revision*)rev;
 @end
 
+static BOOL TDVerbosePusherLoggingEnabled(void)
+{
+    static BOOL enabled;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *value = [[[NSProcessInfo processInfo] environment] objectForKey:@"OTF_VERBOSE_PUSHER_LOGS"];
+        enabled = [value isEqualToString:@"1"] ||
+                  [[value lowercaseString] isEqualToString:@"true"] ||
+                  [[value lowercaseString] isEqualToString:@"yes"];
+    });
+    return enabled;
+}
+
 @implementation TDPusher
 
 @synthesize createTarget = _createTarget;
@@ -311,7 +324,9 @@
     NSUInteger numDocsToSend = docsToSend.count;
     if (numDocsToSend == 0) return;
     os_log_info(CDTOSLog, "%{public}@: Sending %{public}u revisions", self, (unsigned)numDocsToSend);
-    os_log_debug(CDTOSLog, "%{public}@: Sending %{public}@", self, changes.allRevisions);
+    if (TDVerbosePusherLoggingEnabled()) {
+        os_log_debug(CDTOSLog, "%{public}@: Sending %{public}@", self, changes.allRevisions);
+    }
     self.changesTotal += numDocsToSend;
     [self asyncTaskStarted];
     [self sendAsyncRequest:@"POST"
@@ -375,7 +390,9 @@
                           }
                       }
 
-                      os_log_debug(CDTOSLog, "%{public}@: Sent %{public}@", self, changes.allRevisions);
+                      if (TDVerbosePusherLoggingEnabled()) {
+                          os_log_debug(CDTOSLog, "%{public}@: Sent %{public}@", self, changes.allRevisions);
+                      }
 
                   } else if (error && error.code == kTDStatusDuplicate) {
                       // A 412 for the whole batch means we don't know what caused the
@@ -519,7 +536,9 @@ static TDStatus statusFromBulkDocsResponseItem(NSDictionary* item)
                       self.error = error;
                       [self revisionFailed];
                   } else {
-                      os_log_debug(CDTOSLog, "%{public}@: Sent %{public}@ (JSON), response=%{public}@", self, rev, response);
+                      if (TDVerbosePusherLoggingEnabled()) {
+                          os_log_debug(CDTOSLog, "%{public}@: Sent %{public}@ (JSON), response=%{public}@", self, rev, response);
+                      }
                       [self removePending:rev];
                   }
                   [self asyncTasksFinished:1];

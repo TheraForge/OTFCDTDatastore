@@ -37,7 +37,7 @@
 #import "CollectionUtils.h"
 #import "DBQueryUtils.h"
 #import "CDTAttachment.h"
-#import <MRDatabaseContentChecker/MRDatabaseContentChecker.h>
+#import "MRDatabaseContentChecker.h"
 
 @interface DatastoreConflicts : CloudantSyncTests
 @property (nonatomic,strong) CDTDatastore *datastore;

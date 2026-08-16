@@ -1,11 +1,27 @@
 # OTFCDTDatastore
 
+![Coverage](badges/coverage.svg)
+
 OTFCDTDatastore provides Cloudant Sync to store, index and query local JSON data on a device and to synchronise data between many devices. For more details about the OTFCDTDatastore please refer to the [CDTDatastore docs](https://github.com/cloudant/CDTDatastore#cdtdatastore).
 
 Please refer to the top-level parent framework: [OTFToolBox](https://github.com/TheraForge/OTFToolBox)
 
 ## Change Log
 <details open>
+  <summary>Release 2.1.1-tf.3</summary>
+  <ul>
+    <li>Raised the minimum supported versions to iOS 16.0 and watchOS 9.0</li>
+    <li>Updated the required OTFToolBoxCore version to 2.5.0</li>
+    <li>Fixed response interceptors so modified HTTP responses and response data are delivered to callers</li>
+    <li>Fixed duplicate tombstone insertions and preserved attachment blob keys after finalization</li>
+    <li>Improved file-protection error reporting for unavailable datastore paths</li>
+    <li>Changed generated revision ID suffix hashing from SHA-256 to MD5</li>
+    <li>Made detailed replication and index-update logging opt-in through OTF_VERBOSE_* environment variables</li>
+    <li>Expanded replication test coverage and added a checked-in coverage badge workflow</li>
+  </ul>
+</details>
+
+<details>
   <summary>Release 2.1.1-tf.2</summary>
   <ul>
     <li>Updated dependencies for TheraForge 2.0.0 release</li>
@@ -34,6 +50,7 @@ Please refer to the top-level parent framework: [OTFToolBox](https://github.com/
 * [Installation](#installation)
 * [File Protection](#file-protection-levels)
 * [Usage](#usage)
+* [Testing and Coverage](#testing-and-coverage)
 * [License](#license)
 
 
@@ -114,6 +131,19 @@ To access OTF protection levels in your existing application install [Theraforge
 # dataStore.setProtectionLevel(.level)
 
 ```
+
+## Testing and Coverage
+
+To update the checked-in coverage badge, run the local coverage flow and commit the regenerated `badges/coverage.svg` file:
+
+```sh
+pod install
+xcodebuild test -workspace OTFCDTDatastore.xcworkspace -scheme OTFCDTDatastore -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.5' -enableCodeCoverage YES -resultBundlePath /tmp/OTFCDTDatastore-coverage.xcresult
+xcrun xccov view --report --only-targets /tmp/OTFCDTDatastore-coverage.xcresult
+ruby Scripts/generate_coverage_badge.rb /tmp/OTFCDTDatastore-coverage.xcresult
+```
+
+The coverage badge is stored as `badges/coverage.svg` and referenced with a relative README path, so it works wherever the repository contents are published. The badge generator reads the `OTFCDTDatastore.framework` target by default. To update the badge from a manually collected value instead of an Xcode result bundle, run `ruby Scripts/generate_coverage_badge.rb 82.4`.
 
 ## License <a name="license"></a>
 

@@ -239,6 +239,9 @@ static const int responseInterceptorCancelledError = 2;
             return;
         }
     }
+
+    self.response = ctx.response;
+    self.responseData = ctx.responseData;
     
     if (ctx.shouldRetry && self.remainingRetries > 0) {
         // retry
@@ -268,4 +271,3 @@ static const int responseInterceptorCancelledError = 2;
 }
 
 @end
-

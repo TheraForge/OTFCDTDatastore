@@ -142,6 +142,19 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
 @synthesize authorizer=_authorizer;
 @synthesize requestHeaders = _requestHeaders;
 
+static BOOL TDVerboseReplicatorLoggingEnabled(void)
+{
+    static BOOL enabled;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *value = [[[NSProcessInfo processInfo] environment] objectForKey:@"OTF_VERBOSE_REPLICATOR_LOGS"];
+        enabled = [value isEqualToString:@"1"] ||
+                  [[value lowercaseString] isEqualToString:@"true"] ||
+                  [[value lowercaseString] isEqualToString:@"yes"];
+    });
+    return enabled;
+}
+
 - (BOOL)isPush
 {
     return NO;  // guess who overrides this?
@@ -161,7 +174,9 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
 - (void)setLastSequence:(NSObject*)lastSequence
 {
     if (!$equal(lastSequence, _lastSequence)) {
-        os_log_debug(CDTOSLog, "%{public}@: Setting lastSequence to %{public}@ (from %{public}@)", self, lastSequence, _lastSequence);
+        if (TDVerboseReplicatorLoggingEnabled()) {
+            os_log_debug(CDTOSLog, "%{public}@: Setting lastSequence to %{public}@ (from %{public}@)", self, lastSequence, _lastSequence);
+        }
         _lastSequence = [lastSequence copy];
         if (!_lastSequenceChanged) {
             _lastSequenceChanged = YES;
@@ -172,7 +187,9 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
 
 - (void)postProgressChanged
 {
-    os_log_debug(CDTOSLog, "%{public}@: postProgressChanged (%{public}u/%{public}u, active=%{public}d (batch=%{public}u, net=%{public}u), online=%{public}d)", self, (unsigned)_changesProcessed, (unsigned)_changesTotal, _active, (unsigned)_batcher.count, _asyncTaskCount, _online);
+    if (TDVerboseReplicatorLoggingEnabled()) {
+        os_log_debug(CDTOSLog, "%{public}@: postProgressChanged (%{public}u/%{public}u, active=%{public}d (batch=%{public}u, net=%{public}u), online=%{public}d)", self, (unsigned)_changesProcessed, (unsigned)_changesTotal, _active, (unsigned)_batcher.count, _asyncTaskCount, _online);
+    }
     NSNotification* n =
         [NSNotification notificationWithName:TDReplicatorProgressChangedNotification object:self];
     [[NSNotificationQueue defaultQueue]
@@ -349,10 +366,14 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
     _batcher = [[TDBatcher alloc] initWithCapacity:kInboxCapacity
                                              delay:kProcessDelay
                                          processor:^(NSArray* inbox) {
-        os_log_debug(CDTOSLog, "*** %{public}@: BEGIN processInbox (%{public}u sequences)", self, (unsigned)inbox.count);
+        if (TDVerboseReplicatorLoggingEnabled()) {
+            os_log_debug(CDTOSLog, "*** %{public}@: BEGIN processInbox (%{public}u sequences)", self, (unsigned)inbox.count);
+        }
         TD_RevisionList* revs = [[TD_RevisionList alloc] initWithArray:inbox];
         [self processInbox:revs];
-        os_log_debug(CDTOSLog, "*** %{public}@: END processInbox (lastSequence=%{public}@)", self, self->_lastSequence);
+        if (TDVerboseReplicatorLoggingEnabled()) {
+            os_log_debug(CDTOSLog, "*** %{public}@: END processInbox (lastSequence=%{public}@)", self, self->_lastSequence);
+        }
         [self updateActive];
     }];
 
@@ -568,7 +589,7 @@ NSString* TDReplicatorStartedNotification = @"TDReplicatorStarted";
 - (void)addRevsToInbox:(TD_RevisionList*)revs
 {
     Assert(_running);
-    os_log_debug(CDTOSLog, "%{public}@: Received %{public}llu revs", self, (UInt64)revs.count);
+    os_log_info(CDTOSLog, "%{public}@: Received %{public}llu revs", self, (UInt64)revs.count);
     [_batcher queueObjects:revs.allRevisions];
     [self updateActive];
 }

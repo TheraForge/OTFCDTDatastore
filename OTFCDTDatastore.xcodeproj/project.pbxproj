@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05234973888EB5178A22178C /* TD_DatabaseLocalDocsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3B692B18282CB653F7479C13 /* TD_DatabaseLocalDocsTests.m */; };
 		147CCEDD26AACC7900D3B9E1 /* CDTError.h in Headers */ = {isa = PBXBuildFile; fileRef = 147CCEDB26AACC7900D3B9E1 /* CDTError.h */; };
 		147CCEDE26AACC7900D3B9E1 /* CDTError.m in Sources */ = {isa = PBXBuildFile; fileRef = 147CCEDC26AACC7900D3B9E1 /* CDTError.m */; };
 		2E25F68D1F4C6DB900177ABA /* OHHTTPStubsHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 2E25F68C1F4C6DB900177ABA /* OHHTTPStubsHelper.m */; };
@@ -15,7 +16,11 @@
 		3567D43713667ABFE05C08F2 /* CDTDatastore+Replication.h in Headers */ = {isa = PBXBuildFile; fileRef = 3567D9F9C835096137DC8EF2 /* CDTDatastore+Replication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3567DA2E9930DA1BFABB6617 /* CDTDatastore+Replication.m in Sources */ = {isa = PBXBuildFile; fileRef = 3567D4C1BDD33D0148CA9FF2 /* CDTDatastore+Replication.m */; };
 		3567DB3346B03BED878BC14F /* CDTDatastore+Replication.m in Sources */ = {isa = PBXBuildFile; fileRef = 3567D4C1BDD33D0148CA9FF2 /* CDTDatastore+Replication.m */; };
+		41127BF37FAB7711E1F4C9A3 /* CDTEncryptionKeychainUtilsAESTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 487F4EFC9C755E731A77E013 /* CDTEncryptionKeychainUtilsAESTests.m */; };
 		48575E563189A1C9580067C7 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; };
+		54B563C7936F35B7DEEA9990 /* CDTEncryptionKeychainDataTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C520CFE7854A596BE493D /* CDTEncryptionKeychainDataTests.m */; };
+		5B2108A76ED5EE08AD50FD00 /* CDTEncryptionKeychainUtilsPBKDF2Tests.m in Sources */ = {isa = PBXBuildFile; fileRef = 1426DBCE2F04B1E868DEC14A /* CDTEncryptionKeychainUtilsPBKDF2Tests.m */; };
+		6A9F7C2C046AE25BD5D89867 /* CDTEncryptionKeychainManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 214DD1BB6EB2C4A9623847D7 /* CDTEncryptionKeychainManagerTests.m */; };
 		6C89B25A84FD1D1A4E83FFC2 /* Pods_base_OTFCDTDatastoreOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5AB52AFAF97EA219EB93716 /* Pods_base_OTFCDTDatastoreOSX.framework */; };
 		8425D1BA2B2B441B00A97D55 /* GTMNSData+zlib.m in Sources */ = {isa = PBXBuildFile; fileRef = 8425D1B82B2B441B00A97D55 /* GTMNSData+zlib.m */; };
 		8425D1BB2B2B441C00A97D55 /* GTMNSData+zlib.m in Sources */ = {isa = PBXBuildFile; fileRef = 8425D1B82B2B441B00A97D55 /* GTMNSData+zlib.m */; };
@@ -956,6 +961,9 @@
 		98F77F0C1C45189600515CC3 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 98F77F0B1C45189600515CC3 /* libz.tbd */; };
 		98F77F0D1C451CEB00515CC3 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 98F77F091C45163300515CC3 /* libsqlite3.tbd */; };
 		9BD497BC10668F9C811FD03E /* Pods_base_raTests_OTFCDTDatastoreReplicationAcceptanceTestsOSX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F347F4185C237D21720ACC76 /* Pods_base_raTests_OTFCDTDatastoreReplicationAcceptanceTestsOSX.framework */; };
+		B48508927E299C9BB7B4DC40 /* CDTReplay429InterceptorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 53701813D0306A3C782AE2D6 /* CDTReplay429InterceptorTests.m */; };
+		B5397802364114B6E153B926 /* CDTEncryptionKeychainProviderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F28858C63CA98871C5D2253 /* CDTEncryptionKeychainProviderTests.m */; };
+		B712ECE860975E4CADD5817D /* DatastoreReplicationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 68EDFA1D3E1FC7DDD1A65DF8 /* DatastoreReplicationTests.m */; };
 		BE565389DB02E3636A5A7267 /* Pods_base_OTFCDTDatastore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29238DFB7721090B482B5F56 /* Pods_base_OTFCDTDatastore.framework */; };
 		C5AF64D51C76000C007E2551 /* CDTNSURLSessionConfigurationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = C5AF64D41C76000C007E2551 /* CDTNSURLSessionConfigurationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C5AF64D71C760013007E2551 /* CDTNSURLSessionConfigurationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = C5AF64D41C76000C007E2551 /* CDTNSURLSessionConfigurationDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1032,25 +1040,31 @@
 
 /* Begin PBXFileReference section */
 		0CB3BD5388540920678D8B31 /* Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTestsOSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTestsOSX.debug.xcconfig"; path = "Target Support Files/Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTestsOSX/Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTestsOSX.debug.xcconfig"; sourceTree = "<group>"; };
+		1426DBCE2F04B1E868DEC14A /* CDTEncryptionKeychainUtilsPBKDF2Tests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CDTEncryptionKeychainUtilsPBKDF2Tests.m; sourceTree = "<group>"; };
 		147CCEDB26AACC7900D3B9E1 /* CDTError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CDTError.h; sourceTree = "<group>"; };
 		147CCEDC26AACC7900D3B9E1 /* CDTError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CDTError.m; sourceTree = "<group>"; };
+		214DD1BB6EB2C4A9623847D7 /* CDTEncryptionKeychainManagerTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CDTEncryptionKeychainManagerTests.m; sourceTree = "<group>"; };
 		29238DFB7721090B482B5F56 /* Pods_base_OTFCDTDatastore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_base_OTFCDTDatastore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2E25F68B1F4C6DB900177ABA /* OHHTTPStubsHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OHHTTPStubsHelper.h; sourceTree = "<group>"; };
 		2E25F68C1F4C6DB900177ABA /* OHHTTPStubsHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OHHTTPStubsHelper.m; sourceTree = "<group>"; };
 		3567D4C1BDD33D0148CA9FF2 /* CDTDatastore+Replication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CDTDatastore+Replication.m"; sourceTree = "<group>"; };
 		3567D9F9C835096137DC8EF2 /* CDTDatastore+Replication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CDTDatastore+Replication.h"; sourceTree = "<group>"; };
 		37CCC97168FF0DA485C9E88E /* Pods-base-tests-OTFCDTDatastoreTestsOSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-tests-OTFCDTDatastoreTestsOSX.release.xcconfig"; path = "Target Support Files/Pods-base-tests-OTFCDTDatastoreTestsOSX/Pods-base-tests-OTFCDTDatastoreTestsOSX.release.xcconfig"; sourceTree = "<group>"; };
+		3B692B18282CB653F7479C13 /* TD_DatabaseLocalDocsTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = TD_DatabaseLocalDocsTests.m; sourceTree = "<group>"; };
+		487F4EFC9C755E731A77E013 /* CDTEncryptionKeychainUtilsAESTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CDTEncryptionKeychainUtilsAESTests.m; sourceTree = "<group>"; };
 		4A55686CE7F0FFDCD6E66A4E /* Pods-base-tests-OTFCDTDatastoreTestsOSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-tests-OTFCDTDatastoreTestsOSX.debug.xcconfig"; path = "Target Support Files/Pods-base-tests-OTFCDTDatastoreTestsOSX/Pods-base-tests-OTFCDTDatastoreTestsOSX.debug.xcconfig"; sourceTree = "<group>"; };
+		53701813D0306A3C782AE2D6 /* CDTReplay429InterceptorTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CDTReplay429InterceptorTests.m; sourceTree = "<group>"; };
 		59455CAE662AAFD94831D92D /* Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTests.debug.xcconfig"; path = "Target Support Files/Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTests/Pods-base-raTests-OTFCDTDatastoreReplicationAcceptanceTests.debug.xcconfig"; sourceTree = "<group>"; };
 		5A0CC4572BF789AA518779C5 /* Pods-base-OTFCDTDatastoreWatch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-OTFCDTDatastoreWatch.release.xcconfig"; path = "Target Support Files/Pods-base-OTFCDTDatastoreWatch/Pods-base-OTFCDTDatastoreWatch.release.xcconfig"; sourceTree = "<group>"; };
 		64308D9C3A5A4361BF776E13 /* Pods-base-OTFCDTDatastore.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-OTFCDTDatastore.debug.xcconfig"; path = "Target Support Files/Pods-base-OTFCDTDatastore/Pods-base-OTFCDTDatastore.debug.xcconfig"; sourceTree = "<group>"; };
+		68EDFA1D3E1FC7DDD1A65DF8 /* DatastoreReplicationTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = DatastoreReplicationTests.m; sourceTree = "<group>"; };
 		6C58208C97E704F83B067190 /* Pods-base-tests-OTFCDTDatastoreTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-tests-OTFCDTDatastoreTests.release.xcconfig"; path = "Target Support Files/Pods-base-tests-OTFCDTDatastoreTests/Pods-base-tests-OTFCDTDatastoreTests.release.xcconfig"; sourceTree = "<group>"; };
 		77C0FA1D8DAB0FA2F78148F3 /* Pods_base_raTests_OTFCDTDatastoreReplicationAcceptanceTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_base_raTests_OTFCDTDatastoreReplicationAcceptanceTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8425D1B82B2B441B00A97D55 /* GTMNSData+zlib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GTMNSData+zlib.m"; sourceTree = "<group>"; };
 		8425D1B92B2B441B00A97D55 /* GTMNSData+zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GTMNSData+zlib.h"; sourceTree = "<group>"; };
 		8425D1BE2B2B44B000A97D55 /* GTMDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GTMDefines.h; sourceTree = "<group>"; };
 		8470B6242B3448FB001CA097 /* OTFCDTDatastoreWatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = OTFCDTDatastoreWatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8470B6252B3448FC001CA097 /* OTFCDTDatastore-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "OTFCDTDatastore-Info.plist"; path = "/Users/admin/Documents/HippocratesTech/OTFCDTDatastore/OTFCDTDatastore-Info.plist"; sourceTree = "<absolute>"; };
+		8470B6252B3448FC001CA097 /* OTFCDTDatastore-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "OTFCDTDatastore-Info.plist"; sourceTree = "<group>"; };
 		847B5BD726C2D2E0009D946F /* CloudantTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CloudantTests.m; sourceTree = "<group>"; };
 		847B5BD826C2D2E0009D946F /* CloudantTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudantTests.h; sourceTree = "<group>"; };
 		861B94A55086B046E0EA6955 /* Pods-base-OTFCDTDatastoreOSX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-OTFCDTDatastoreOSX.release.xcconfig"; path = "Target Support Files/Pods-base-OTFCDTDatastoreOSX/Pods-base-OTFCDTDatastoreOSX.release.xcconfig"; sourceTree = "<group>"; };
@@ -1058,6 +1072,7 @@
 		8E1C2D26470B0BB740FB1E5F /* Pods-base-tests-OTFCDTDatastoreTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-tests-OTFCDTDatastoreTests.debug.xcconfig"; path = "Target Support Files/Pods-base-tests-OTFCDTDatastoreTests/Pods-base-tests-OTFCDTDatastoreTests.debug.xcconfig"; sourceTree = "<group>"; };
 		8E2DDDF61D1BEFBE00673564 /* CDTReplay429Interceptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDTReplay429Interceptor.h; sourceTree = "<group>"; };
 		8E2DDDF71D1BEFBE00673564 /* CDTReplay429Interceptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDTReplay429Interceptor.m; sourceTree = "<group>"; };
+		8E3C520CFE7854A596BE493D /* CDTEncryptionKeychainDataTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CDTEncryptionKeychainDataTests.m; sourceTree = "<group>"; };
 		8E6D540B207B7190006FF35F /* CDTDatastoreTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CDTDatastoreTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		8E6D540C207B7190006FF35F /* CDTDatastoreTestsOSX-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CDTDatastoreTestsOSX-Bridging-Header.h"; sourceTree = "<group>"; };
 		8E6D540D207B7191006FF35F /* SwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTests.swift; sourceTree = "<group>"; };
@@ -1123,7 +1138,6 @@
 		98F77B391C43FC9F00515CC3 /* CDTDatastore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CDTDatastore.h; sourceTree = "<group>"; };
 		98F77B3B1C43FC9F00515CC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		98F77B401C43FC9F00515CC3 /* OTFCDTDatastoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OTFCDTDatastoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		98F77B451C43FC9F00515CC3 /* CDTDatastoreTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CDTDatastoreTests.m; sourceTree = "<group>"; };
 		98F77B471C43FC9F00515CC3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		98F77B511C43FCEE00515CC3 /* CDTAttachment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDTAttachment.h; sourceTree = "<group>"; };
 		98F77B521C43FCEE00515CC3 /* CDTAttachment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDTAttachment.m; sourceTree = "<group>"; };
@@ -1449,6 +1463,7 @@
 		98F77F091C45163300515CC3 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		98F77F0B1C45189600515CC3 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		9A20B40F1CBF381304693046 /* Pods-base-OTFCDTDatastoreOSX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-OTFCDTDatastoreOSX.debug.xcconfig"; path = "Target Support Files/Pods-base-OTFCDTDatastoreOSX/Pods-base-OTFCDTDatastoreOSX.debug.xcconfig"; sourceTree = "<group>"; };
+		9F28858C63CA98871C5D2253 /* CDTEncryptionKeychainProviderTests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = CDTEncryptionKeychainProviderTests.m; sourceTree = "<group>"; };
 		AD3EB65606BD1DC96009AC37 /* Pods_base_tests_OTFCDTDatastoreTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_base_tests_OTFCDTDatastoreTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9E1241D9BD9E769680E4272 /* Pods-base-OTFCDTDatastore.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-base-OTFCDTDatastore.release.xcconfig"; path = "Target Support Files/Pods-base-OTFCDTDatastore/Pods-base-OTFCDTDatastore.release.xcconfig"; sourceTree = "<group>"; };
 		C5AB52AFAF97EA219EB93716 /* Pods_base_OTFCDTDatastoreOSX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_base_OTFCDTDatastoreOSX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1817,12 +1832,15 @@
 				98F77E6A1C44044000515CC3 /* Tests-Prefix.pch */,
 				98F77E6B1C44044000515CC3 /* Tests.m */,
 				98F77E6C1C44044000515CC3 /* Utils */,
-				98F77B451C43FC9F00515CC3 /* CDTDatastoreTests.m */,
 				98F77B471C43FC9F00515CC3 /* Info.plist */,
 				8E6D540D207B7191006FF35F /* SwiftTests.swift */,
 				8E6D540B207B7190006FF35F /* CDTDatastoreTests-Bridging-Header.h */,
 				8E6D540C207B7190006FF35F /* CDTDatastoreTestsOSX-Bridging-Header.h */,
 				8EFE944120E3A58F00B1C9F5 /* CDTLifecycleTests.m */,
+				68EDFA1D3E1FC7DDD1A65DF8 /* DatastoreReplicationTests.m */,
+				A400DE1037A9851A08C6A2A7 /* Keychain */,
+				3B692B18282CB653F7479C13 /* TD_DatabaseLocalDocsTests.m */,
+				53701813D0306A3C782AE2D6 /* CDTReplay429InterceptorTests.m */,
 			);
 			path = OTFCDTDatastoreTests;
 			sourceTree = "<group>";
@@ -2276,6 +2294,19 @@
 				98F77ED11C44045000515CC3 /* InfoPlist.strings */,
 			);
 			path = en.lproj;
+			sourceTree = "<group>";
+		};
+		A400DE1037A9851A08C6A2A7 /* Keychain */ = {
+			isa = PBXGroup;
+			children = (
+				8E3C520CFE7854A596BE493D /* CDTEncryptionKeychainDataTests.m */,
+				214DD1BB6EB2C4A9623847D7 /* CDTEncryptionKeychainManagerTests.m */,
+				9F28858C63CA98871C5D2253 /* CDTEncryptionKeychainProviderTests.m */,
+				487F4EFC9C755E731A77E013 /* CDTEncryptionKeychainUtilsAESTests.m */,
+				1426DBCE2F04B1E868DEC14A /* CDTEncryptionKeychainUtilsPBKDF2Tests.m */,
+			);
+			name = Keychain;
+			path = Keychain;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3907,6 +3938,14 @@
 				98F77EAF1C44044000515CC3 /* TD_DatabaseBlobFilenamesTests.m in Sources */,
 				90825D122B31B095009D3DBB /* FMDatabaseQueue.m in Sources */,
 				98F77EAB1C44044000515CC3 /* CDTQSQLOnlyIndexManager.m in Sources */,
+				B712ECE860975E4CADD5817D /* DatastoreReplicationTests.m in Sources */,
+				54B563C7936F35B7DEEA9990 /* CDTEncryptionKeychainDataTests.m in Sources */,
+				6A9F7C2C046AE25BD5D89867 /* CDTEncryptionKeychainManagerTests.m in Sources */,
+				B5397802364114B6E153B926 /* CDTEncryptionKeychainProviderTests.m in Sources */,
+				41127BF37FAB7711E1F4C9A3 /* CDTEncryptionKeychainUtilsAESTests.m in Sources */,
+				5B2108A76ED5EE08AD50FD00 /* CDTEncryptionKeychainUtilsPBKDF2Tests.m in Sources */,
+				05234973888EB5178A22178C /* TD_DatabaseLocalDocsTests.m in Sources */,
+				B48508927E299C9BB7B4DC40 /* CDTReplay429InterceptorTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4009,7 +4048,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "OTFCDTDatastore-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cloudant.CDTDatastore-Watch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4021,7 +4060,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -4039,7 +4078,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "OTFCDTDatastore-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.cloudant.CDTDatastore-Watch";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4050,7 +4089,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = RELEASE;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -4167,7 +4206,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/OTFCDTDatastoreTestApp/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4182,7 +4221,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/OTFCDTDatastoreTestApp/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTestApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4197,7 +4236,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				INFOPLIST_FILE = OTFCDTDatastoreTestAppTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTestAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4213,7 +4252,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				INFOPLIST_FILE = OTFCDTDatastoreTestAppTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTestAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4228,7 +4267,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				INFOPLIST_FILE = OTFCDTDatastoreTestAppUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTestAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4243,7 +4282,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				INFOPLIST_FILE = OTFCDTDatastoreTestAppUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTestAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4290,7 +4329,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -4333,7 +4372,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -4357,7 +4396,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "$(SRCROOT)/OTFCDTDatastore/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4369,7 +4408,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -4387,7 +4426,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = "$(SRCROOT)/OTFCDTDatastore/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastore;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4398,7 +4437,7 @@
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = RELEASE;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -4408,6 +4447,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = OTFCDTDatastoreTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4423,6 +4463,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = OTFCDTDatastoreTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4437,6 +4478,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = NO;
 				INFOPLIST_FILE = OTFCDTDatastoreReplicationAcceptanceTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreReplicationAcceptanceTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4450,6 +4492,7 @@
 			buildSettings = {
 				CLANG_ENABLE_MODULES = NO;
 				INFOPLIST_FILE = OTFCDTDatastoreReplicationAcceptanceTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cloudant.CDTDatastoreReplicationAcceptanceTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

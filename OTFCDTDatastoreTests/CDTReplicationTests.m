@@ -26,8 +26,16 @@
 #import "TDPuller.h"
 #import "TDPusher.h"
 #import "CDTSessionCookieInterceptor.h"
+#import "CDTIAMSessionCookieInterceptor.h"
 #import "CDTReplay429Interceptor.h"
+#import "CDTURLSession.h"
 #import "TD_Database.h"
+#import "TD_Database+Insertion.h"
+#import "TD_Database+Replication.h"
+#import "TDChangeTracker.h"
+#import "TDInternal.h"
+#import "TDJSON.h"
+#import "TDStatus.h"
 #import <OHHTTPStubs/OHHTTPStubs.h>
 #import <OHHTTPStubs/OHHTTPStubsResponse+JSON.h>
 #import <OCMock/OCMock.h>
@@ -92,6 +100,38 @@
     }
 
     return context;
+}
+
+@end
+
+#pragma mark Utility - ChangeTrackerRecordingClient
+
+@interface ChangeTrackerRecordingClient : NSObject <TDChangeTrackerClient>
+
+@property (nonatomic, strong) NSMutableArray<NSDictionary *> *changes;
+@property (nonatomic) BOOL stopped;
+
+@end
+
+@implementation ChangeTrackerRecordingClient
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        _changes = [NSMutableArray array];
+    }
+    return self;
+}
+
+- (void)changeTrackerReceivedChange:(NSDictionary *)change
+{
+    [self.changes addObject:change];
+}
+
+- (void)changeTrackerStopped:(TDChangeTracker *)tracker
+{
+    self.stopped = YES;
 }
 
 @end
@@ -185,6 +225,530 @@
 @end
 
 @implementation CDTReplicationTests
+
+- (TDReplicator *)tdReplicatorForReplication:(CDTAbstractReplication *)replication
+                                       error:(NSError **)error
+{
+    CDTReplicatorFactory *factory =
+        [[CDTReplicatorFactory alloc] initWithDatastoreManager:self.factory];
+    CDTReplicator *replicator = [factory oneWay:replication error:error];
+    if (!replicator) {
+        return nil;
+    }
+    return [replicator buildTDReplicatorFromConfiguration:error];
+}
+
+- (NSDictionary<NSString *, NSString *> *)queryItemsForChangeTracker:(TDChangeTracker *)tracker
+{
+    NSURLComponents *components =
+        [NSURLComponents componentsWithURL:tracker.changesFeedURL resolvingAgainstBaseURL:NO];
+    NSMutableDictionary<NSString *, NSString *> *items = [NSMutableDictionary dictionary];
+    for (NSURLQueryItem *item in components.queryItems) {
+        items[item.name] = item.value ?: @"";
+    }
+    return items;
+}
+
+- (TDChangeTracker *)changeTrackerWithMode:(TDChangeTrackerMode)mode
+                              lastSequence:(id)lastSequence
+                                    client:(id<TDChangeTrackerClient>)client
+{
+    CDTURLSession *session =
+        [[CDTURLSession alloc] initWithCallbackThread:[NSThread currentThread]
+                                  requestInterceptors:@[]
+                                sessionConfigDelegate:nil];
+    return [[TDChangeTracker alloc] initWithDatabaseURL:[NSURL URLWithString:@"https://example.com/db"]
+                                                   mode:mode
+                                              conflicts:NO
+                                           lastSequence:lastSequence
+                                                 client:client
+                                                session:session];
+}
+
+- (TD_Revision *)insertRevisionWithDocID:(NSString *)docID
+                            previousRevID:(NSString *)previousRevID
+                                  deleted:(BOOL)deleted
+                               inDatabase:(TD_Database *)database
+{
+    TD_Revision *rev = [[TD_Revision alloc] initWithDocID:docID revID:nil deleted:deleted];
+    if (!deleted) {
+        rev.body = [[TD_Body alloc] initWithProperties:@{@"doc": docID}];
+    }
+
+    TDStatus status = 0;
+    TD_Revision *inserted = [database putRevision:rev
+                                   prevRevisionID:previousRevID
+                                    allowConflict:YES
+                                           status:&status];
+    XCTAssertFalse(TDStatusIsError(status), @"Unexpected insert status: %ld", (long)status);
+    XCTAssertNotNil(inserted);
+    return inserted;
+}
+
+- (NSArray<NSString *> *)docRevIDsFromRevisionList:(TD_RevisionList *)revisions
+{
+    NSMutableArray<NSString *> *docRevIDs = [NSMutableArray array];
+    for (TD_Revision *rev in revisions) {
+        [docRevIDs addObject:[NSString stringWithFormat:@"%@/%@", rev.docID, rev.revID]];
+    }
+    return docRevIDs;
+}
+
+- (void)testValidateOptionalHeadersAcceptsNilAndUserAgent
+{
+    NSError *error = nil;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+    XCTAssertTrue([CDTAbstractReplication validateOptionalHeaders:nil error:&error]);
+#pragma clang diagnostic pop
+    XCTAssertNil(error);
+
+    XCTAssertTrue([CDTAbstractReplication
+        validateOptionalHeaders:@{@"User-Agent": @"CloudantSyncTests"}
+                          error:&error]);
+    XCTAssertNil(error);
+}
+
+- (void)testValidateOptionalHeadersRejectsNonStringKeysAndValues
+{
+    NSError *error = nil;
+    XCTAssertFalse([CDTAbstractReplication validateOptionalHeaders:@{@42: @"value"} error:&error]);
+    XCTAssertEqualObjects(error.domain, CDTReplicationErrorDomain);
+    XCTAssertEqual(error.code, CDTReplicationErrorBadOptionalHttpHeaderType);
+
+    error = nil;
+    XCTAssertFalse(
+        [CDTAbstractReplication validateOptionalHeaders:@{@"X-Test": @42} error:&error]);
+    XCTAssertEqualObjects(error.domain, CDTReplicationErrorDomain);
+    XCTAssertEqual(error.code, CDTReplicationErrorBadOptionalHttpHeaderType);
+}
+
+- (void)testClearInterceptorsRemovesConfiguredAndURLCredentialInterceptors
+{
+    NSURL *remoteUrl = [NSURL URLWithString:@"http://user:pass@example.com/db"];
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"clear_interceptors" error:nil];
+    CDTPullReplication *pull =
+        [CDTPullReplication replicationWithSource:remoteUrl target:datastore];
+    [pull addInterceptor:[[ContextCaptureInterceptor alloc] init]];
+
+    XCTAssertEqual(pull.httpInterceptors.count, 2u);
+
+    [pull clearInterceptors];
+
+    XCTAssertEqual(pull.httpInterceptors.count, 0u);
+}
+
+- (void)testCopyPreservesHeadersCredentialsAndInterceptors
+{
+    NSURL *remoteUrl = [NSURL URLWithString:@"https://example.com/db"];
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"copy_abstract" error:nil];
+    CDTPullReplication *pull = [CDTPullReplication replicationWithSource:remoteUrl
+                                                                  target:datastore
+                                                                username:@"username"
+                                                                password:@"password"];
+    ContextCaptureInterceptor *interceptor = [[ContextCaptureInterceptor alloc] init];
+    pull.optionalHeaders = @{@"X-Test": @"value"};
+    [pull addInterceptor:interceptor];
+
+    CDTPullReplication *copy = [pull copy];
+
+    XCTAssertNotEqual(copy, pull);
+    XCTAssertEqualObjects(copy.optionalHeaders, pull.optionalHeaders);
+    XCTAssertEqualObjects(copy.username, @"username");
+    XCTAssertEqualObjects(copy.password, @"password");
+    XCTAssertEqual(copy.httpInterceptors.count, 1u);
+    XCTAssertEqual(copy.httpInterceptors.firstObject, interceptor);
+}
+
+- (void)testValidateRemoteDatastoreURLReportsNilSourceAndTarget
+{
+    CDTPullReplication *pull = [[CDTPullReplication alloc] init];
+    CDTPushReplication *push = [[CDTPushReplication alloc] init];
+
+    NSError *error = nil;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+    XCTAssertFalse([pull validateRemoteDatastoreURL:nil error:&error]);
+#pragma clang diagnostic pop
+    XCTAssertEqualObjects(error.domain, CDTReplicationErrorDomain);
+    XCTAssertEqual(error.code, CDTReplicationErrorUndefinedSource);
+
+    error = nil;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnonnull"
+    XCTAssertFalse([push validateRemoteDatastoreURL:nil error:&error]);
+#pragma clang diagnostic pop
+    XCTAssertEqualObjects(error.domain, CDTReplicationErrorDomain);
+    XCTAssertEqual(error.code, CDTReplicationErrorUndefinedTarget);
+}
+
+- (void)testValidateRemoteDatastoreURLRejectsInvalidSchemeAndIncompleteCredentials
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"invalid_remote_validation" error:nil];
+    CDTPullReplication *pull =
+        [CDTPullReplication replicationWithSource:[NSURL URLWithString:@"https://example.com/db"]
+                                           target:datastore];
+
+    NSError *error = nil;
+    XCTAssertFalse([pull validateRemoteDatastoreURL:[NSURL URLWithString:@"ftp://example.com/db"]
+                                             error:&error]);
+    XCTAssertEqual(error.code, CDTReplicationErrorInvalidScheme);
+
+    error = nil;
+    XCTAssertFalse(
+        [pull validateRemoteDatastoreURL:[NSURL URLWithString:@"https://user@example.com/db"]
+                                   error:&error]);
+    XCTAssertEqual(error.code, CDTReplicationErrorIncompleteCredentials);
+
+    error = nil;
+    XCTAssertFalse(
+        [pull validateRemoteDatastoreURL:[NSURL URLWithString:@"https://:pass@example.com/db"]
+                                   error:&error]);
+    XCTAssertEqual(error.code, CDTReplicationErrorIncompleteCredentials);
+}
+
+- (void)testPushAndPullReplicationAssignSourceAndTarget
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"source_target" error:nil];
+    NSURL *remoteUrl = [NSURL URLWithString:@"https://example.com/db"];
+
+    CDTPushReplication *push = [CDTPushReplication replicationWithSource:datastore
+                                                                  target:remoteUrl];
+    XCTAssertEqual(push.source, datastore);
+    XCTAssertEqualObjects(push.target, remoteUrl);
+
+    CDTPullReplication *pull = [CDTPullReplication replicationWithSource:remoteUrl
+                                                                  target:datastore];
+    XCTAssertEqualObjects(pull.source, remoteUrl);
+    XCTAssertEqual(pull.target, datastore);
+}
+
+- (void)testIAMAPIKeyInitializersSanitizeURLAndAddIAMInterceptor
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"iam_replication" error:nil];
+    NSURL *remoteUrl = [NSURL URLWithString:@"https://user:pass@example.com/db"];
+
+    CDTPushReplication *push = [CDTPushReplication replicationWithSource:datastore
+                                                                  target:remoteUrl
+                                                               IAMAPIKey:@"api key/with spaces"];
+    XCTAssertEqualObjects(push.target.absoluteString, @"https://example.com/db");
+    XCTAssertEqual(push.httpInterceptors.count, 1u);
+    XCTAssertEqualObjects([push.httpInterceptors.firstObject class],
+                          [CDTIAMSessionCookieInterceptor class]);
+
+    CDTPullReplication *pull = [CDTPullReplication replicationWithSource:remoteUrl
+                                                                  target:datastore
+                                                               IAMAPIKey:@"api key/with spaces"];
+    XCTAssertEqualObjects(pull.source.absoluteString, @"https://example.com/db");
+    XCTAssertEqual(pull.httpInterceptors.count, 1u);
+    XCTAssertEqualObjects([pull.httpInterceptors.firstObject class],
+                          [CDTIAMSessionCookieInterceptor class]);
+}
+
+- (void)testPushReplicationCopyPreservesFilterAndConfiguration
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"push_copy" error:nil];
+    NSURL *remoteUrl = [NSURL URLWithString:@"https://example.com/db"];
+    CDTPushReplication *push = [CDTPushReplication replicationWithSource:datastore
+                                                                  target:remoteUrl];
+    push.filterParams = @{@"allow": @YES};
+    push.filter = ^BOOL(CDTDocumentRevision *revision, NSDictionary *params) {
+        return [revision.docId isEqualToString:@"allowed"] && [params[@"allow"] boolValue];
+    };
+
+    CDTPushReplication *copy = [push copy];
+    CDTDocumentRevision *revision =
+        [[CDTDocumentRevision alloc] initWithDocId:@"allowed"
+                                        revisionId:@"1-a"
+                                              body:@{}
+                                           deleted:NO
+                                       attachments:@{}
+                                          sequence:1];
+
+    XCTAssertEqual(copy.source, datastore);
+    XCTAssertEqualObjects(copy.target, remoteUrl);
+    XCTAssertEqualObjects(copy.filterParams, push.filterParams);
+    XCTAssertTrue(copy.filter(revision, copy.filterParams));
+}
+
+- (void)testPullReplicationCopyPreservesFilterAndConfiguration
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"pull_copy" error:nil];
+    NSURL *remoteUrl = [NSURL URLWithString:@"https://example.com/db"];
+    CDTPullReplication *pull = [CDTPullReplication replicationWithSource:remoteUrl
+                                                                  target:datastore];
+    pull.filter = @"design/by_type";
+    pull.filterParams = @{@"type": @"task"};
+
+    CDTPullReplication *copy = [pull copy];
+
+    XCTAssertEqualObjects(copy.source, remoteUrl);
+    XCTAssertEqual(copy.target, datastore);
+    XCTAssertEqualObjects(copy.filter, pull.filter);
+    XCTAssertEqualObjects(copy.filterParams, pull.filterParams);
+}
+
+- (void)testFactoryCreatesPushAndPullWrappersWithExpectedUnderlyingConfiguration
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"factory_config" error:nil];
+    NSURL *remoteUrl = [NSURL URLWithString:@"https://example.com/db"];
+    NSDictionary *headers = @{@"X-Test": @"value"};
+
+    CDTPullReplication *pull = [CDTPullReplication replicationWithSource:remoteUrl
+                                                                  target:datastore];
+    pull.optionalHeaders = headers;
+    pull.filter = @"design/filter";
+    pull.filterParams = @{@"type": @"active"};
+    ContextCaptureInterceptor *pullInterceptor = [[ContextCaptureInterceptor alloc] init];
+    [pull addInterceptor:pullInterceptor];
+
+    NSError *error = nil;
+    TDReplicator *tdPull = [self tdReplicatorForReplication:pull error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(tdPull);
+    XCTAssertFalse(tdPull.isPush);
+    XCTAssertEqual(tdPull.db, datastore.database);
+    XCTAssertEqualObjects(tdPull.remote, remoteUrl);
+    XCTAssertEqualObjects(tdPull.requestHeaders, headers);
+    XCTAssertEqualObjects(tdPull.filterName, @"design/filter");
+    XCTAssertEqualObjects(tdPull.filterParameters, pull.filterParams);
+    XCTAssertEqualObjects(tdPull.interceptors, @[ pullInterceptor ]);
+
+    CDTPushReplication *push = [CDTPushReplication replicationWithSource:datastore
+                                                                  target:remoteUrl];
+    push.optionalHeaders = headers;
+    push.filterParams = @{@"local": @"yes"};
+    ContextCaptureInterceptor *pushInterceptor = [[ContextCaptureInterceptor alloc] init];
+    [push addInterceptor:pushInterceptor];
+
+    error = nil;
+    TDReplicator *tdPush = [self tdReplicatorForReplication:push error:&error];
+    XCTAssertNil(error);
+    XCTAssertNotNil(tdPush);
+    XCTAssertTrue(tdPush.isPush);
+    XCTAssertEqual(tdPush.db, datastore.database);
+    XCTAssertEqualObjects(tdPush.remote, remoteUrl);
+    XCTAssertEqualObjects(tdPush.requestHeaders, headers);
+    XCTAssertNil(tdPush.filterName);
+    XCTAssertEqualObjects(tdPush.filterParameters, push.filterParams);
+    XCTAssertEqualObjects(tdPush.interceptors, @[ pushInterceptor ]);
+    XCTAssertFalse(((TDPusher *)tdPush).createTarget);
+}
+
+- (void)testFactoryRejectsInvalidOptionalHeaderConfigurationWithoutStartingReplication
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"factory_invalid_headers" error:nil];
+    CDTPullReplication *pull =
+        [CDTPullReplication replicationWithSource:[NSURL URLWithString:@"https://example.com/db"]
+                                           target:datastore];
+    pull.optionalHeaders = (NSDictionary *)@{@"X-Test": @42};
+
+    NSError *error = nil;
+    CDTReplicatorFactory *factory =
+        [[CDTReplicatorFactory alloc] initWithDatastoreManager:self.factory];
+    CDTReplicator *replicator = [factory oneWay:pull error:&error];
+
+    XCTAssertNil(replicator);
+    XCTAssertEqualObjects(error.domain, CDTReplicationErrorDomain);
+    XCTAssertEqual(error.code, CDTReplicationErrorBadOptionalHttpHeaderType);
+}
+
+- (void)testCheckpointSaveAndLoadPreservesOldAndNewSequenceFormats
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"checkpoint_storage" error:nil];
+    TD_Database *database = datastore.database;
+
+    NSError *error = nil;
+    NSDictionary *oldCheckpoint = @{@"_id": @"_local/old-checkpoint", @"seq": @7};
+    XCTAssertTrue([database saveCheckpointDocument:oldCheckpoint error:&error]);
+    XCTAssertNil(error);
+    NSDictionary *loadedOld = [database checkpointDocumentWithID:@"old-checkpoint"];
+    XCTAssertEqualObjects(loadedOld[@"seq"], @7);
+    XCTAssertNil(loadedOld[@"source_last_seq"]);
+
+    NSDictionary *newCheckpoint = @{
+        @"_id": @"_local/new-checkpoint",
+        @"source_last_seq": @42,
+        @"history": @[ @{@"session_id": @"session-a", @"recorded_seq": @42} ],
+        @"session_id": @"session-a",
+        @"replication_id_version": @3
+    };
+    XCTAssertTrue([database saveCheckpointDocument:newCheckpoint error:&error]);
+    XCTAssertNil(error);
+    NSDictionary *loadedNew = [database checkpointDocumentWithID:@"new-checkpoint"];
+    XCTAssertEqualObjects(loadedNew[@"source_last_seq"], @42);
+    XCTAssertEqualObjects(loadedNew[@"history"], newCheckpoint[@"history"]);
+}
+
+- (void)testJoinQuotedStringsEscapesQuotesAndHandlesEmptyInput
+{
+    XCTAssertEqualObjects([TD_Database joinQuotedStrings:@[]], @"");
+    XCTAssertEqualObjects([TD_Database joinQuotedStrings:@[@"alpha"]], @"'alpha'");
+    NSArray *stringsToQuote = @[@"a'b", @"c"];
+    NSString *quotedStrings = [TD_Database joinQuotedStrings:stringsToQuote];
+    XCTAssertEqualObjects(quotedStrings, @"'a''b','c'");
+}
+
+- (void)testFindMissingRevisionsHandlesEmptyInput
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"missing_empty" error:nil];
+    TD_RevisionList *revisions = [[TD_RevisionList alloc] init];
+
+    XCTAssertTrue([datastore.database findMissingRevisions:revisions]);
+    XCTAssertEqual(revisions.count, 0u);
+}
+
+- (void)testFindMissingRevisionsLeavesOnlyMissingRevisions
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"missing_revisions" error:nil];
+    TD_Database *database = datastore.database;
+    TD_Revision *existing =
+        [self insertRevisionWithDocID:@"existing" previousRevID:nil deleted:NO inDatabase:database];
+    TD_Revision *deletedParent =
+        [self insertRevisionWithDocID:@"deleted" previousRevID:nil deleted:NO inDatabase:database];
+    TD_Revision *deleted = [self insertRevisionWithDocID:@"deleted"
+                                           previousRevID:deletedParent.revID
+                                                 deleted:YES
+                                              inDatabase:database];
+    TD_Revision *missing =
+        [[TD_Revision alloc] initWithDocID:@"missing" revID:@"1-missing" deleted:NO];
+    TD_RevisionList *revisions =
+        [[TD_RevisionList alloc] initWithArray:@[ existing, deleted, missing ]];
+
+    XCTAssertTrue([database findMissingRevisions:revisions]);
+
+    XCTAssertEqualObjects([self docRevIDsFromRevisionList:revisions],
+                          @[ @"missing/1-missing" ]);
+}
+
+- (void)testFindMissingRevisionsHandlesDuplicateMissingRevisions
+{
+    CDTDatastore *datastore = [self.factory datastoreNamed:@"missing_duplicates" error:nil];
+    TD_Revision *missing =
+        [[TD_Revision alloc] initWithDocID:@"missing" revID:@"1-missing" deleted:NO];
+    TD_RevisionList *revisions =
+        [[TD_RevisionList alloc] initWithArray:@[ missing, missing ]];
+
+    XCTAssertTrue([datastore.database findMissingRevisions:revisions]);
+
+    XCTAssertEqualObjects([self docRevIDsFromRevisionList:revisions],
+                          (@[ @"missing/1-missing", @"missing/1-missing" ]));
+}
+
+- (void)testChangeTrackerBuildsChangesFeedPathForEachMode
+{
+    ChangeTrackerRecordingClient *client = [[ChangeTrackerRecordingClient alloc] init];
+    NSDictionary *expectedFeeds = @{
+        @(kOneShot): @"normal",
+        @(kLongPoll): @"longpoll",
+        @(kContinuous): @"continuous"
+    };
+
+    for (NSNumber *modeNumber in expectedFeeds) {
+        TDChangeTracker *tracker = [self changeTrackerWithMode:(TDChangeTrackerMode)modeNumber.integerValue
+                                                  lastSequence:nil
+                                                        client:client];
+        NSDictionary *query = [self queryItemsForChangeTracker:tracker];
+        XCTAssertEqualObjects(query[@"feed"], expectedFeeds[modeNumber]);
+        XCTAssertEqualObjects(query[@"heartbeat"], @"300000");
+    }
+}
+
+- (void)testChangeTrackerEscapesSinceFilterParametersAndDocIDs
+{
+    ChangeTrackerRecordingClient *client = [[ChangeTrackerRecordingClient alloc] init];
+    NSArray *lastSequence = @[ @"10", @"node/a b" ];
+    TDChangeTracker *tracker = [self changeTrackerWithMode:kLongPoll
+                                              lastSequence:lastSequence
+                                                    client:client];
+    tracker.limit = 25;
+    tracker.filterName = @"design/filter name";
+    tracker.filterParameters = @{@"space key": @"a value&b", @"number": @7};
+
+    NSDictionary *query = [self queryItemsForChangeTracker:tracker];
+    XCTAssertEqualObjects(query[@"since"],
+                          [TDJSON stringWithJSONObject:lastSequence options:0 error:nil]);
+    XCTAssertEqualObjects(query[@"limit"], @"25");
+    XCTAssertEqualObjects(query[@"filter"], @"design/filter name");
+    XCTAssertEqualObjects(query[@"space key"], @"a value&b");
+    XCTAssertEqualObjects(query[@"number"], @"7");
+
+    TDChangeTracker *docIDsTracker = [self changeTrackerWithMode:kOneShot
+                                                    lastSequence:nil
+                                                          client:client];
+    docIDsTracker.docIDs = @[ @"doc/a", @"space doc" ];
+    NSDictionary *docIDsQuery = [self queryItemsForChangeTracker:docIDsTracker];
+    NSData *docIDsData = [docIDsQuery[@"doc_ids"] dataUsingEncoding:NSUTF8StringEncoding];
+    NSArray *docIDs = [TDJSON JSONObjectWithData:docIDsData options:0 error:nil];
+    XCTAssertEqualObjects(docIDsQuery[@"filter"], @"_doc_ids");
+    XCTAssertEqualObjects(docIDs, docIDsTracker.docIDs);
+}
+
+- (void)testChangeTrackerReceivedPollResponseHandlesEmptyAndMalformedResults
+{
+    ChangeTrackerRecordingClient *client = [[ChangeTrackerRecordingClient alloc] init];
+    TDChangeTracker *tracker = [self changeTrackerWithMode:kOneShot
+                                              lastSequence:nil
+                                                    client:client];
+    NSString *errorMessage = nil;
+    NSData *emptyResults = [@"{\"results\":[]}" dataUsingEncoding:NSUTF8StringEncoding];
+
+    XCTAssertEqual([tracker receivedPollResponse:emptyResults errorMessage:&errorMessage], 0);
+    XCTAssertNil(errorMessage);
+    XCTAssertNil(tracker.lastSequenceID);
+    XCTAssertEqual(client.changes.count, 0u);
+
+    errorMessage = nil;
+    XCTAssertEqual([tracker receivedPollResponse:nil errorMessage:&errorMessage], -1);
+    XCTAssertEqualObjects(errorMessage, @"No body in response");
+
+    errorMessage = nil;
+    NSData *malformedJSON = [@"{\"results\":[" dataUsingEncoding:NSUTF8StringEncoding];
+    XCTAssertEqual([tracker receivedPollResponse:malformedJSON errorMessage:&errorMessage], -1);
+    XCTAssertTrue([errorMessage containsString:@"JSON parse error"]);
+
+    errorMessage = nil;
+    NSData *missingResults = [@"{\"results\":{}}" dataUsingEncoding:NSUTF8StringEncoding];
+    XCTAssertEqual([tracker receivedPollResponse:missingResults errorMessage:&errorMessage], -1);
+    XCTAssertEqualObjects(errorMessage, @"No 'changes' array in response");
+
+    errorMessage = nil;
+    NSData *invalidChange = [@"{\"results\":[\"bad\"]}" dataUsingEncoding:NSUTF8StringEncoding];
+    XCTAssertEqual([tracker receivedPollResponse:invalidChange errorMessage:&errorMessage], -1);
+    XCTAssertTrue([errorMessage containsString:@"Invalid change object"]);
+}
+
+- (void)testChangeTrackerReceivedPollResponseUpdatesLastSequence
+{
+    ChangeTrackerRecordingClient *client = [[ChangeTrackerRecordingClient alloc] init];
+    TDChangeTracker *tracker = [self changeTrackerWithMode:kOneShot
+                                              lastSequence:nil
+                                                    client:client];
+    NSString *bodyString =
+        @"{\"results\":[{\"seq\":1,\"id\":\"doc1\",\"changes\":[{\"rev\":\"1-a\"}]},"
+        @"{\"seq\":\"2-b\",\"id\":\"doc2\",\"changes\":[{\"rev\":\"1-b\"}]}]}";
+    NSData *body = [bodyString dataUsingEncoding:NSUTF8StringEncoding];
+    NSString *errorMessage = nil;
+
+    XCTAssertEqual([tracker receivedPollResponse:body errorMessage:&errorMessage], 2);
+    XCTAssertNil(errorMessage);
+    XCTAssertEqualObjects(tracker.lastSequenceID, @"2-b");
+    XCTAssertEqual(client.changes.count, 2u);
+    XCTAssertEqualObjects(client.changes.lastObject[@"id"], @"doc2");
+}
+
+- (void)testChangeTrackerSetUpstreamErrorRecordsError
+{
+    ChangeTrackerRecordingClient *client = [[ChangeTrackerRecordingClient alloc] init];
+    TDChangeTracker *tracker = [self changeTrackerWithMode:kOneShot
+                                              lastSequence:nil
+                                                    client:client];
+
+    [tracker setUpstreamError:@"boom"];
+
+    XCTAssertEqualObjects(tracker.error.domain, @"TDChangeTracker");
+    XCTAssertEqual(tracker.error.code, kTDStatusUpstreamError);
+}
 
 - (void) testURLCredsIgnoredIfParametersPresentPull
 {

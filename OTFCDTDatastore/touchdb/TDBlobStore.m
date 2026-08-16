@@ -326,7 +326,8 @@ NSString *const CDTBlobStoreErrorDomain = @"CDTBlobStoreErrorDomain";
     Assert(_blobWriter, @"Already finished");
     [self closeFile];
     CC_SHA1_Final(_blobKey.bytes, &_shaCtx);
-    CC_SHA256_Final(_blobKey.bytes, &_sha256Ctx);
+    uint8_t sha256Digest[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256_Final(sha256Digest, &_sha256Ctx);
 }
 
 - (NSString*)MD5DigestString

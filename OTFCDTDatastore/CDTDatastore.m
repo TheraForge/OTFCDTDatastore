@@ -112,33 +112,36 @@ int runningProcess;
 }
 
 #if TARGET_OS_IPHONE
--(void)encrypt: (NSDictionary*) attributes error:(NSError*)error {
+-(void)encrypt:(NSDictionary *)attributes error:(NSError **)error {
     NSString *dbPath = self.directory;
     if ([[NSFileManager defaultManager] fileExistsAtPath: dbPath]) {
-        NSURL *dbURL = [NSURL URLWithString: dbPath];
-        NSError *error;
-        [[NSFileManager defaultManager] setAttributes:attributes ofItemAtPath: [dbURL path] error:&error];
-        
-        if (error != nil) {
-            @throw error;
-        }
+        [[NSFileManager defaultManager] setAttributes:attributes
+                                        ofItemAtPath:dbPath
+                                               error:error];
     } else {
-        @throw [CDTError errorWith: NoFileFoundAtPath];
+        if (error != NULL) {
+            *error = [CDTError errorWith:NoFileFoundAtPath];
+        }
     }
 }
 
 - (void)encryptFile:(NSFileProtectionType)type {
-    NSError *error;
-    [self encryptFile:type error:error];
+    NSError *error = nil;
+    [self encryptFile:type error:&error];
+    if (error != nil) {
+        @throw error;
+    }
 }
 
--(void)encryptFile: (NSFileProtectionType)type error:(NSError*)error {
+-(void)encryptFile:(NSFileProtectionType)type error:(NSError **)error {
     NSDictionary *attributes = nil;
     if (@available(iOS 9.0, *)) {
         attributes = @{NSFileProtectionKey : type};
-        [self encrypt:attributes error: error];
+        [self encrypt:attributes error:error];
     } else {
-        @throw [CDTError errorWith: EncryptionAvailableAboveiOS9];
+        if (error != NULL) {
+            *error = [CDTError errorWith:EncryptionAvailableAboveiOS9];
+        }
     }
 }
 
@@ -162,7 +165,7 @@ int runningProcess;
 - (NSFileProtectionType)appliedProtectionPolicyOnDb {
     NSString *dbPath = self.directory;
     if ([[NSFileManager defaultManager] fileExistsAtPath: dbPath]) {
-        NSURL *dbURL = [NSURL URLWithString: dbPath];
+        NSURL *dbURL = [NSURL fileURLWithPath:dbPath isDirectory:YES];
         NSFileProtectionType currentProtection = [self isProtectedItemAtURL:dbURL];
         return currentProtection;
     } else {
@@ -204,10 +207,11 @@ int runningProcess;
 
 -(nullable NSError*)startTimerWithDuration: (NSTimeInterval)seconds {
     NSLog(@"Encryption mode changed NSFileProtectionCompleteUnlessOpen");
-    NSError *err;
-    [self encryptFile: NSFileProtectionCompleteUnlessOpen error: err];
+    NSError *err = nil;
+    [self encryptFile:NSFileProtectionCompleteUnlessOpen error:&err];
     [NSTimer scheduledTimerWithTimeInterval:seconds repeats:false block:^(NSTimer * _Nonnull timer) {
-        [self encryptFile: NSFileProtectionComplete error: err];
+        NSError *timerError = nil;
+        [self encryptFile:NSFileProtectionComplete error:&timerError];
         NSLog(@"Encryption mode changed NSFileProtectionComplete");
         [self endBackgroundTaskIfAny];
     }];

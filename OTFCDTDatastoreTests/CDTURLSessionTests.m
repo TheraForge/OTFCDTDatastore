@@ -98,6 +98,25 @@
 
 @end
 
+@interface CDTReplacingResponseHTTPInterceptor : NSObject <CDTHTTPInterceptor>
+
+@end
+
+@implementation CDTReplacingResponseHTTPInterceptor
+
+- (CDTHTTPInterceptorContext *)interceptResponseInContext:
+    (nonnull CDTHTTPInterceptorContext *)context
+{
+    context.response = [[NSHTTPURLResponse alloc] initWithURL:context.request.URL
+                                                   statusCode:200
+                                                  HTTPVersion:@"HTTP/1.1"
+                                                 headerFields:@{}];
+    context.responseData = [@"{\"ok\":true}" dataUsingEncoding:NSUTF8StringEncoding];
+    return context;
+}
+
+@end
+
 @interface NilReturningRequestHTTPInterceptor : NSObject <CDTHTTPInterceptor>
 
 @end
@@ -135,18 +154,29 @@
 
 @property int errors;
 
+@property (nullable, nonatomic, strong) NSURLResponse *lastResponse;
+
+@property (nullable, nonatomic, strong) NSData *lastData;
+
 @property XCTestExpectation *errorExpectation;
+
+@property XCTestExpectation *responseExpectation;
+
+@property XCTestExpectation *dataExpectation;
 
 @end
 
 @implementation CountingDelegate
 
 - (void)receivedData:(nullable NSData *)data {
-    // empty
+    _lastData = data;
+    [_dataExpectation fulfill];
 }
 
 - (void)receivedResponse:(nullable NSURLResponse *)response {
     _responses++;
+    _lastResponse = response;
+    [_responseExpectation fulfill];
 }
 
 - (void)requestDidError:(nullable NSError *)error {
@@ -239,6 +269,44 @@
         [NSThread sleepForTimeInterval:0.1f];
     }
     XCTAssertEqual(replayingInterceptor.timesCalled, 2);
+}
+
+- (void)testResponseInterceptorCanReplaceResponseAndData
+{
+    CDTReplacingResponseHTTPInterceptor *replacingInterceptor =
+        [[CDTReplacingResponseHTTPInterceptor alloc] init];
+    CDTURLSession *session = [[CDTURLSession alloc] initWithCallbackThread:[NSThread currentThread]
+                                                       requestInterceptors:@[ replacingInterceptor ]
+                                                     sessionConfigDelegate:self];
+
+    NSURLRequest *request =
+        [NSURLRequest requestWithURL:[NSURL URLWithString:@"http://examples.cloudant.com"]];
+
+    CountingDelegate *del = [[CountingDelegate alloc] init];
+    del.responseExpectation = [self expectationWithDescription:@"receivedResponse called"];
+    del.dataExpectation = [self expectationWithDescription:@"receivedData called"];
+
+    CDTURLSessionTask *task = [session dataTaskWithRequest:request taskDelegate:del];
+    NSHTTPURLResponse *originalResponse =
+        [[NSHTTPURLResponse alloc] initWithURL:request.URL
+                                    statusCode:404
+                                   HTTPVersion:@"HTTP/1.1"
+                                  headerFields:@{}];
+    NSData *originalData = [@"{\"error\":\"not_found\"}" dataUsingEncoding:NSUTF8StringEncoding];
+
+    [task processResponse:originalResponse onThread:[NSThread currentThread]];
+    [task processData:originalData];
+    [task completedThread:[NSThread currentThread]];
+
+    [self waitForExpectationsWithTimeout:10.0 handler:nil];
+
+    NSHTTPURLResponse *response = (NSHTTPURLResponse *)del.lastResponse;
+    NSString *body = [[NSString alloc] initWithData:del.lastData encoding:NSUTF8StringEncoding];
+
+    XCTAssertEqual(response.statusCode, 200);
+    XCTAssertEqualObjects(body, @"{\"ok\":true}");
+    XCTAssertEqual(del.responses, 1);
+    XCTAssertEqual(del.errors, 0);
 }
 
 - (void)testMaxNumberOfRetriesEnforced

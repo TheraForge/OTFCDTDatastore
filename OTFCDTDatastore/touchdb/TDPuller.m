@@ -58,6 +58,19 @@
 
 static NSString* joinQuotedEscaped(NSArray* strings);
 
+static BOOL TDVerbosePullerLoggingEnabled(void)
+{
+    static BOOL enabled;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSString *value = [[[NSProcessInfo processInfo] environment] objectForKey:@"OTF_VERBOSE_PULLER_LOGS"];
+        enabled = [value isEqualToString:@"1"] ||
+                  [[value lowercaseString] isEqualToString:@"true"] ||
+                  [[value lowercaseString] isEqualToString:@"yes"];
+    });
+    return enabled;
+}
+
 @implementation TDPuller
 
 - (instancetype)initWithDB:(TD_Database*)db
@@ -109,7 +122,9 @@ static NSString* joinQuotedEscaped(NSArray* strings);
                           break;
                       default:
                           [strongSelf setBulkGetSupported:false];
-                          os_log_debug(CDTOSLog, "%{public}@ Remote database returned unexpected status code %ld when trying to determine whether database supports _bulk_get. Defaulting to _bulk_get not supported.", self, (long)error.code);
+                          if (TDVerbosePullerLoggingEnabled()) {
+                              os_log_debug(CDTOSLog, "%{public}@ Remote database returned unexpected status code %ld when trying to determine whether database supports _bulk_get. Defaulting to _bulk_get not supported.", self, (long)error.code);
+                          }
                   }
                   done = YES;
               }];
@@ -277,7 +292,9 @@ static NSString* joinQuotedEscaped(NSArray* strings);
                     // based on the order in which it appeared in the _changes feed:
                     rev.remoteSequenceID = remoteSequenceID;
                     if (changes.count > 1) rev.conflicted = true;
-                    os_log_debug(CDTOSLog, "%{public}@: Received #%{public}@ %{public}@", self, remoteSequenceID, rev);
+                    if (TDVerbosePullerLoggingEnabled()) {
+                        os_log_debug(CDTOSLog, "%{public}@: Received #%{public}@ %{public}@", self, remoteSequenceID, rev);
+                    }
                     [self addToInbox:rev];
 
                     changeCount++;
@@ -325,7 +342,9 @@ static NSString* joinQuotedEscaped(NSArray* strings);
 - (void)processInbox:(nullable TD_RevisionList*)inbox
 {
     // Ask the local database which of the revs are not known to it:
-    os_log_debug(CDTOSLog, "%{public}@: Looking up %{public}@", self, inbox);
+    if (TDVerbosePullerLoggingEnabled()) {
+        os_log_debug(CDTOSLog, "%{public}@: Looking up %{public}@", self, inbox);
+    }
     id lastInboxSequence = [inbox.allRevisions.lastObject remoteSequenceID];
     NSUInteger total = _changesTotal - inbox.count;
     if (![_db findMissingRevisions:inbox]) {
@@ -345,7 +364,9 @@ static NSString* joinQuotedEscaped(NSArray* strings);
         return;
     }
 
-    os_log_debug(CDTOSLog, "%{public}@ queuing remote revisions %{public}@", self, inbox.allRevisions);
+    if (TDVerbosePullerLoggingEnabled()) {
+        os_log_debug(CDTOSLog, "%{public}@ queuing remote revisions %{public}@", self, inbox.allRevisions);
+    }
 
     // Dump the revs into the queues of revs to pull from the remote db:
     unsigned numBulked = 0;
@@ -623,7 +644,9 @@ static NSString* joinQuotedEscaped(NSArray* strings);
                     [self revisionFailed];
                     continue;
                 }
-                os_log_debug(CDTOSLog, "%{public}@ inserting %{public}@ %{public}@", self, rev.docID, [history my_compactDescription]);
+                if (TDVerbosePullerLoggingEnabled()) {
+                    os_log_debug(CDTOSLog, "%{public}@ inserting %{public}@ %{public}@", self, rev.docID, [history my_compactDescription]);
+                }
 
                 // Insert the revision:
                 TDStatus status = [_db forceInsert:rev revisionHistory:history source:_remote];

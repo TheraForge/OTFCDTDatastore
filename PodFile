@@ -13,12 +13,12 @@ abstract_target 'base' do
     pod 'SQLCipher/fts', '~> 3.1.0' if ENV["encrypted"]
 
     target :OTFCDTDatastore do
-        platform :ios, '13.0'
-        pod 'OTFToolBoxCore', '~> 1.0.5-beta'
+        platform :ios, '16.0'
+        pod 'OTFToolBoxCore', '2.5.0'
     end
     target :OTFCDTDatastoreWatch do
-        platform :watchos, '8.0'
-        pod 'OTFToolBoxCore', '~> 1.0.5-beta'
+        platform :watchos, '9.0'
+        pod 'OTFToolBoxCore', '2.5.0'
     end
     target :OTFCDTDatastoreOSX do
         platform :osx, '10.9'
@@ -33,7 +33,7 @@ abstract_target 'base' do
         pod 'RSSwizzle'
 
         target :OTFCDTDatastoreTests do
-            platform :ios, '13.0'
+            platform :ios, '16.0'
         end
 
         target :OTFCDTDatastoreTestsOSX do
@@ -52,12 +52,18 @@ abstract_target 'base' do
         end
 
         target :OTFCDTDatastoreReplicationAcceptanceTests do
-          platform :ios, '13.0'
+          platform :ios, '16.0'
         end
     end
 
     post_install do | installer |
         print "SQLCipher: link Pods/Headers/sqlite3.h"
         system "mkdir -p Pods/Headers/Private && ln -s ../../SQLCipher/sqlite3.h Pods/Headers/Private"
+        installer.pods_project.targets.each do |target|
+            target.build_configurations.each do |config|
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '16.0'
+                config.build_settings['WATCHOS_DEPLOYMENT_TARGET'] = '9.0'
+            end
+        end
     end
 end
